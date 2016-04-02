@@ -1,0 +1,12 @@
+c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship\bin\Debug\Windyship.dll.config
+c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship\bin\Debug\Windyship.dll
+c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship\bin\Debug\Windyship.pdb
+c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship\bin\Debug\EntityFramework.dll
+c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship\bin\Debug\EntityFramework.SqlServer.dll
+c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship\bin\Debug\Newtonsoft.Json.dll
+c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship\bin\Debug\EntityFramework.xml
+c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship\bin\Debug\EntityFramework.SqlServer.xml
+c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship\bin\Debug\Newtonsoft.Json.xml
+c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship\obj\Debug\Windyship.dll
+c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship\obj\Debug\Windyship.pdb
+c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship\obj\Debug\Windyship.Dal.csprojResolveAssemblyReference.cache
