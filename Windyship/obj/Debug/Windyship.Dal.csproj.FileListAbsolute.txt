@@ -9,4 +9,6 @@ c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship
 c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship\bin\Debug\Newtonsoft.Json.xml
 c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship\obj\Debug\Windyship.dll
 c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship\obj\Debug\Windyship.pdb
-c:\users\administrator\documents\visual studio 2013\Projects\Windyship\Windyship\obj\Debug\Windyship.Dal.csprojResolveAssemblyReference.cache
+C:\Users\Administrator\documents\visual studio 2013\Projects\Windyship\Windyship\obj\Debug\Windyship.Migrations.InitialCreate.resources
+C:\Users\Administrator\documents\visual studio 2013\Projects\Windyship\Windyship\obj\Debug\Windyship.Dal.csproj.GenerateResource.Cache
+C:\Users\Administrator\documents\visual studio 2013\Projects\Windyship\Windyship\obj\Debug\Windyship.Migrations.Content.resources

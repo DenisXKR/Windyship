@@ -61,6 +61,8 @@ namespace Windyship.Entities
 
 		public bool PhoneChecked { get; set; }
 
+		public DateTime? CodeLastSentTime { get; set; }
+
 		[JsonIgnore]
 		public UserRole Role { get; set; }
 

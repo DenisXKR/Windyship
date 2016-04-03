@@ -95,6 +95,7 @@ namespace Windyship.Api.Services.IdentitySvc
 
 			user.PhoneCode = smsCode;
 			user.PhoneChecked = false;
+			user.IsActive = true;
 
 			await Store.UpdateAsync(user);
 

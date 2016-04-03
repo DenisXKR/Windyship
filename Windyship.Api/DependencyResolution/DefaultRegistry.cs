@@ -43,7 +43,9 @@ namespace Windyship.Api.DependencyResolution {
 			For<DbContext>().Use<WindyContext>();
 			For<IUnitOfWork>().Use<UnitOfWork>();
 			For<IDataContext<User, int>>().Use<DataContext<User, int>>();
+			For<IDataContext<Content, int>>().Use<DataContext<Content, int>>();
 			For<IUserRepository>().Use<UserRepository>();
+			For<IContentRepository>().Use<ContentRepository>();
 
 			For<UserManager<WindyUser, int>>().Use<WindyUserManager>();
 			For<IAuthenticationManager>().Use(() => HttpContext.Current.GetOwinContext().Authentication);

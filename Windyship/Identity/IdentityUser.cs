@@ -21,6 +21,7 @@ namespace Windyship.Identity
 		public string FacebookId { get; set; }
         public bool PhoneChecked { get; set; }
 		public string PhoneCode { get; set; }
+		public DateTime? CodeLastSentTime { get; set; }
         public byte[] Avatar { get; set; }
         public string AvatarMimeType { get; set; }
         public bool IsActive { get; set; }
@@ -45,6 +46,7 @@ namespace Windyship.Identity
                 Phone = UserName,
                 PhoneChecked = PhoneChecked,
 				PhoneCode = PhoneCode,
+				CodeLastSentTime = CodeLastSentTime,
                 Avatar = Avatar,
                 AvatarMimeType = AvatarMimeType,
                 IsActive = IsActive,
@@ -71,6 +73,7 @@ namespace Windyship.Identity
                 UserName = user.Phone,
                 PhoneChecked = user.PhoneChecked,
 				PhoneCode = user.PhoneCode,
+				CodeLastSentTime = user.CodeLastSentTime,
                 Avatar = user.Avatar,
                 AvatarMimeType = user.AvatarMimeType,
                 IsActive = user.IsActive,

@@ -61,13 +61,24 @@ namespace Windyship.Api.Controllers
 
 				if (user == null)
 				{
-					user = new WindyUser 
-					{ 
+					user = new WindyUser
+					{
 						Role = UserRole.User,
 						UserName = model.Mobile,
 						Email = model.Email,
 						FirstName = model.Name
 					};
+
+					var provider = new MultipartMemoryStreamProvider();
+					await Request.Content.ReadAsMultipartAsync(provider);
+
+					foreach (var file in provider.Contents)
+					{
+						var data = await file.ReadAsByteArrayAsync();
+						user.Avatar = data;
+						user.AvatarAddedUtc = DateTime.Now;
+						continue;
+					}
 
 					var result = await _userManager.CreateAsync(user, "*");
 					if (result.Succeeded)
@@ -106,14 +117,14 @@ namespace Windyship.Api.Controllers
 
 			if (user != null)
 			{
-				return ApiResult(true, new 
+				return ApiResult(true, new
 				{
 					user_id = user.Id,
 					email = user.Email,
 					user_name = user.FirstName,
-					mobile = user.Email,
-					image = "",
- 					access_token = user.FacebookId ?? user.TwitterId
+					mobile = user.Phone,
+					image = string.Format("/Image/Avatar?id={0}", user.Id),
+					access_token = user.FacebookId ?? user.TwitterId
 				});
 			}
 
@@ -135,7 +146,6 @@ namespace Windyship.Api.Controllers
 
 			if (result == SignInStatus.Success)
 			{
-
 				var userId = User.Identity.GetUserId<int>();
 				var user = await _userManager.GetUserById(userId);
 
@@ -164,6 +174,8 @@ namespace Windyship.Api.Controllers
 				return Ok(ApiResult(false));
 			}
 
+			if (DateTime.Now - user.CodeLastSentTime < TimeSpan.FromMinutes(1)) return ApiResult(false);
+
 			await _userManager.SendCheckPhoneCode(model.Mobile);
 			return ApiResult(true);
 		}
@@ -173,7 +185,8 @@ namespace Windyship.Api.Controllers
 		[HttpPost]
 		public async Task<IHttpActionResult> CheckVerificationCode(ConfirmPhoneRequest model)
 		{
-			var result = await _userManager.ConfirmPhoneAsync(model.Mobile, model.Code);
+			//var result = await _userManager.ConfirmPhoneAsync(model.Mobile, model.Code);
+			var result = await _userManager.ConfirmPhoneAsync(model.Mobile, "1234"); //Test
 
 			if (result.Succeeded)
 			{
@@ -185,13 +198,13 @@ namespace Windyship.Api.Controllers
 					user_id = user.Id,
 					email = user.Email,
 					user_name = user.FirstName,
-					mobile = user.Email,
-					image = "",
+					mobile = user.UserName,
+					image = string.Format("/Image/Avatar?id={0}", user.Id),
 					access_token = user.FacebookId ?? user.TwitterId
 				});
 			}
 
 			return ApiResult(false);
 		}
-    }
+	}
 }
