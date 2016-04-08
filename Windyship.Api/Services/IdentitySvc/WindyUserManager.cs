@@ -1,11 +1,9 @@
-﻿using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using LoginModule;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
+using System;
+using System.Threading.Tasks;
 using Windyship.Api.Site.Services.IdentitySvc;
-using Windyship.Entities;
 
 namespace Windyship.Api.Services.IdentitySvc
 {
@@ -45,6 +43,13 @@ namespace Windyship.Api.Services.IdentitySvc
 			//RegisterTwoFactorProvider("Email Code", emailTokenProvider);
 
 			//			SmsService = new SmsService();
+
+			var dataProtectorProvider = OwinStart.DataProtectionProvider;
+			var dataProtector = dataProtectorProvider.Create("Windyship Identity");
+			this.UserTokenProvider = new DataProtectorTokenProvider<WindyUser, int>(dataProtector)
+			{
+				TokenLifespan = TimeSpan.FromDays(365),
+			};
 		}
 
 		public async Task<IdentityResult> ConfirmPhoneAsync(string phone, string token)
@@ -56,10 +61,11 @@ namespace Windyship.Api.Services.IdentitySvc
 			}
 
 			if (string.Compare(user.PhoneCode, token) == 0)
-			{ 
+			{
 				user.PhoneCode = null;
 				user.PhoneChecked = true;
 				user.IsActive = true;
+				user.CodeLastSentTime = null;
 				await Store.UpdateAsync(user);
 
 				return IdentityResult.Success;
@@ -90,23 +96,25 @@ namespace Windyship.Api.Services.IdentitySvc
 			var user = await Store.FindByNameAsync(phone);
 			if (user == null) return;
 
-			var smsCode = TokenGenerator.GetUniqueDigits(6);
+#warning Test
+			var smsCode = "1234";
+			//var smsCode = TokenGenerator.GetUniqueDigits(6);
+
 			var isPhoneChecked = user.PhoneChecked;
 
 			user.PhoneCode = smsCode;
 			user.PhoneChecked = false;
-			user.IsActive = true;
+			user.IsActive = false;
+			user.CodeLastSentTime = DateTime.Now;
 
 			await Store.UpdateAsync(user);
 
 #warning SendSMS
 
 			/*
-			if (isPhoneChecked)
-			{
 				var smsText = string.Format("Code: {0}", smsCode);
 				var sended = await Sms24x7.Send(phone, smsText);
-			}*/
+			*/
 		}
 
 		public async Task<bool> IsAccountConfirmedAsync(string phone)
@@ -118,6 +126,24 @@ namespace Windyship.Api.Services.IdentitySvc
 			}
 
 			return await base.IsEmailConfirmedAsync(user.Id);
+		}
+
+		public async Task UpdateUser(WindyUser user)
+		{
+			await Store.UpdateAsync(user);
+		}
+
+		public override async Task<IdentityResult> CreateAsync(WindyUser user)
+		{
+			var result = await base.CreateAsync(user);
+
+			if (result.Succeeded)
+			{
+				user.Token = await this.GenerateUserTokenAsync("login", user.Id);
+				await Store.UpdateAsync(user);
+			}
+
+			return result;
 		}
 	}
 }

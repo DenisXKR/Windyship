@@ -1,0 +1,15 @@
+C:\Users\Administrator\Documents\Visual Studio 2013\Projects\Windyship\Windyship\bin\Release\Windyship.dll.config
+C:\Users\Administrator\Documents\Visual Studio 2013\Projects\Windyship\Windyship\bin\Release\Windyship.dll
+C:\Users\Administrator\Documents\Visual Studio 2013\Projects\Windyship\Windyship\bin\Release\Windyship.pdb
+C:\Users\Administrator\Documents\Visual Studio 2013\Projects\Windyship\Windyship\bin\Release\EntityFramework.dll
+C:\Users\Administrator\Documents\Visual Studio 2013\Projects\Windyship\Windyship\bin\Release\EntityFramework.SqlServer.dll
+C:\Users\Administrator\Documents\Visual Studio 2013\Projects\Windyship\Windyship\bin\Release\Newtonsoft.Json.dll
+C:\Users\Administrator\Documents\Visual Studio 2013\Projects\Windyship\Windyship\bin\Release\EntityFramework.xml
+C:\Users\Administrator\Documents\Visual Studio 2013\Projects\Windyship\Windyship\bin\Release\EntityFramework.SqlServer.xml
+C:\Users\Administrator\Documents\Visual Studio 2013\Projects\Windyship\Windyship\bin\Release\Newtonsoft.Json.xml
+C:\Users\Administrator\Documents\Visual Studio 2013\Projects\Windyship\Windyship\obj\Release\Windyship.Dal.csprojResolveAssemblyReference.cache
+C:\Users\Administrator\Documents\Visual Studio 2013\Projects\Windyship\Windyship\obj\Release\Windyship.Migrations.InitialCreate.resources
+C:\Users\Administrator\Documents\Visual Studio 2013\Projects\Windyship\Windyship\obj\Release\Windyship.Migrations.Content.resources
+C:\Users\Administrator\Documents\Visual Studio 2013\Projects\Windyship\Windyship\obj\Release\Windyship.Dal.csproj.GenerateResource.Cache
+C:\Users\Administrator\Documents\Visual Studio 2013\Projects\Windyship\Windyship\obj\Release\Windyship.dll
+C:\Users\Administrator\Documents\Visual Studio 2013\Projects\Windyship\Windyship\obj\Release\Windyship.pdb

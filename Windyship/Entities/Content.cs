@@ -13,7 +13,7 @@ namespace Windyship.Entities
 		public int Id { get; set; }
 
 		public Language Language { get; set; }
-
+		
 		public ContentPart ContentPart { get; set; }
 
 		public string Text { get; set; }

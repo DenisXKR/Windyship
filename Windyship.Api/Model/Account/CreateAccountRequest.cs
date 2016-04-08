@@ -14,8 +14,6 @@ namespace Windyship.Api.Model.Account
 		[Required, EmailAddress]
 		public string Email { get; set; }
 
-		//image (multi/part) // optional
-
 		[Required]
 		public string Mobile { get; set; }
 	}

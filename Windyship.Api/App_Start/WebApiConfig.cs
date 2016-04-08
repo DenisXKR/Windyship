@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Owin.Security.OAuth;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
@@ -9,6 +10,9 @@ namespace Windyship.Api
     {
         public static void Register(HttpConfiguration config)
         {
+			config.SuppressDefaultHostAuthentication();
+			config.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
+
             config.MapHttpAttributeRoutes();
 
             config.Routes.MapHttpRoute(

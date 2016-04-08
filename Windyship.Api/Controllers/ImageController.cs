@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using Microsoft.AspNet.Identity;
-using Windyship.Repositories;
+﻿using Microsoft.AspNet.Identity;
 using System.Threading.Tasks;
+using System.Web.Mvc;
+using Windyship.Repositories;
 
 namespace Windyship.Api.Controllers
 {
@@ -18,7 +14,7 @@ namespace Windyship.Api.Controllers
 			_userRepository = userRepository;
 		}
 
-		[Authorize]
+		[AllowAnonymous]
         public async Task<ActionResult> Avatar(int id)
         {
 			var userId = User.Identity.GetUserId<int>();

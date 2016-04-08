@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Windyship.Dal", "Windyship\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Windyship.Api", "Windyship.Api\Windyship.Api.csproj", "{2BC9F5D2-ED12-47C6-87C2-79F1DB984168}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OauthTest", "OauthTest\OauthTest.csproj", "{652823E4-00E1-4A74-94D6-3EE5657B60CD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{2BC9F5D2-ED12-47C6-87C2-79F1DB984168}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2BC9F5D2-ED12-47C6-87C2-79F1DB984168}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2BC9F5D2-ED12-47C6-87C2-79F1DB984168}.Release|Any CPU.Build.0 = Release|Any CPU
+		{652823E4-00E1-4A74-94D6-3EE5657B60CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{652823E4-00E1-4A74-94D6-3EE5657B60CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{652823E4-00E1-4A74-94D6-3EE5657B60CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{652823E4-00E1-4A74-94D6-3EE5657B60CD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

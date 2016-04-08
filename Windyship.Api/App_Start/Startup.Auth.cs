@@ -1,13 +1,23 @@
 ﻿using LoginModule;
 using Microsoft.AspNet.Identity;
 using Microsoft.Owin;
+using Microsoft.Owin.Security.OAuth;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.DataProtection;
 using Microsoft.Owin.Security.Facebook;
+using Microsoft.Owin.Security.OAuth;
 using Microsoft.Owin.Security.Twitter;
 using Owin;
 using System;
 using System.Web.Configuration;
+using Windyship.Api.Services.IdentitySvc;
+using Windyship.Repositories;
+using Microsoft.Owin.Cors;
+using Microsoft.AspNet.Identity.Owin;
+using Windyship.Dal;
+using Windyship.Entities;
+using Windyship.Dal.Core;
+using Windyship.Core;
 
 [assembly: OwinStartup(typeof(OwinStart))]
 namespace LoginModule
@@ -29,6 +39,7 @@ namespace LoginModule
 			// Enable the application to use a cookie to store information for the signed in user
 			// and to use a cookie to temporarily store information about a user logging in with a third party login provider
 			// Configure the sign in cookie
+			/*
 			app.UseCookieAuthentication(new CookieAuthenticationOptions
 			{
 				AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
@@ -43,17 +54,33 @@ namespace LoginModule
 						}
 					}
 				}
+			});*/
+
+			app.CreatePerOwinContext<WindyContext>(() => new WindyContext());
+			app.CreatePerOwinContext<WindyUserManager>(CreateManager);
+
+			app.UseCors(CorsOptions.AllowAll);
+
+			app.UseOAuthAuthorizationServer(new OAuthAuthorizationServerOptions
+			{
+				TokenEndpointPath = new PathString("/token"),
+				Provider = new TokenAuthorizationServerProvider(),
+				AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(30),
+				AllowInsecureHttp = true,
+
 			});
+
+			app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions()); 
 
 			app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
 
 			// Enables the application to temporarily store user information when they are verifying the second factor in the two-factor authentication process.
-			app.UseTwoFactorSignInCookie(DefaultAuthenticationTypes.TwoFactorCookie, TimeSpan.FromMinutes(5));
+			//app.UseTwoFactorSignInCookie(DefaultAuthenticationTypes.TwoFactorCookie, TimeSpan.FromMinutes(5));
 
 			// Enables the application to remember the second login verification factor such as phone or email.
 			// Once you check this option, your second step of verification during the login process will be remembered on the device where you logged in from.
 			// This is similar to the RememberMe option when you log in.
-			app.UseTwoFactorRememberBrowserCookie(DefaultAuthenticationTypes.TwoFactorRememberBrowserCookie);
+			//app.UseTwoFactorRememberBrowserCookie(DefaultAuthenticationTypes.TwoFactorRememberBrowserCookie);
 
 			// Uncomment the following lines to enable logging in with third party login providers
 			//app.UseMicrosoftAccountAuthentication(
@@ -90,6 +117,18 @@ namespace LoginModule
 			app.UseFacebookAuthentication(fbOptions);
 		}
 
+		private static WindyUserManager CreateManager(IdentityFactoryOptions<WindyUserManager> options, IOwinContext context)
+		{
+			var windyContext = context.Get<WindyContext>();
+			IDataContext<User, int> dataContext = new DataContext<User, int>(windyContext);
+			var userRepository = new UserRepository(dataContext);
+
+			var userStore = new WindyUserStore(userRepository, new UnitOfWork(windyContext));
+			var owinManager = new WindyUserManager(userStore);
+			return owinManager;
+		}
+
+		/*
 		private static bool IsWebRequest(IOwinRequest request)
 		{
 			var pathStartsWithApi = request.Path.StartsWithSegments(new PathString("/api"));
@@ -129,5 +168,6 @@ namespace LoginModule
 
 			return true;
 		}
+		 */
 	}
 }

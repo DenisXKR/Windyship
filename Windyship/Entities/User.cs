@@ -48,6 +48,9 @@ namespace Windyship.Entities
 		public string SecurityStamp { get; set; }
 
 		[JsonIgnore]
+		public string Token { get; set; }
+
+		[JsonIgnore]
 		public byte[] Avatar { get; set; }
 
 		[JsonIgnore]

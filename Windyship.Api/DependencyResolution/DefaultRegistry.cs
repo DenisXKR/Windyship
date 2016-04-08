@@ -15,7 +15,8 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Windyship.Api.DependencyResolution {
+namespace Windyship.Api.DependencyResolution
+{
 	using Microsoft.AspNet.Identity;
 	using Microsoft.Owin.Security;
 	using StructureMap.Configuration.DSL;
@@ -28,32 +29,49 @@ namespace Windyship.Api.DependencyResolution {
 	using Windyship.Dal.Core;
 	using Windyship.Entities;
 	using Windyship.Repositories;
-	
-    public class DefaultRegistry : Registry {
-        #region Constructors and Destructors
 
-        public DefaultRegistry() {
-            Scan(
-                scan => {
-                    scan.TheCallingAssembly();
-                    scan.WithDefaultConventions();
-                });
-            //For<IExample>().Use<Example>();
+	public class DefaultRegistry : Registry
+	{
+		#region Constructors and Destructors
+
+		public DefaultRegistry()
+		{
+			Scan(
+				scan =>
+				{
+					scan.TheCallingAssembly();
+					scan.WithDefaultConventions();
+				});
 
 			For<DbContext>().Use<WindyContext>();
 			For<IUnitOfWork>().Use<UnitOfWork>();
 			For<IDataContext<User, int>>().Use<DataContext<User, int>>();
 			For<IDataContext<Content, int>>().Use<DataContext<Content, int>>();
+			For<IDataContext<Faq, int>>().Use<DataContext<Faq, int>>();
+			For<IDataContext<UserRequest, int>>().Use<DataContext<UserRequest, int>>();
+			For<IDataContext<Category, int>>().Use<DataContext<Category, int>>();
+			For<IDataContext<LocationTo, int>>().Use<DataContext<LocationTo, int>>();
+			For<IDataContext<LocationFrom, int>>().Use<DataContext<LocationFrom, int>>();
+
+			For<IDataContext<Shipment, int>>().Use<DataContext<Shipment, int>>();
+
 			For<IUserRepository>().Use<UserRepository>();
 			For<IContentRepository>().Use<ContentRepository>();
+			For<IFaqRepository>().Use<FaqRepository>();
+			For<IUserRequestRepository>().Use<UserRequestRepository>();
+			For<ICategoryRepository>().Use<CategoryRepository>();
+			For<ILocationToRepository>().Use<LocationToRepository>();
+			For<ILocationFromRepository>().Use<LocationFromRepository>();
+
+			For<IShipmentRepository>().Use<ShipmentRepository>();
 
 			For<UserManager<WindyUser, int>>().Use<WindyUserManager>();
 			For<IAuthenticationManager>().Use(() => HttpContext.Current.GetOwinContext().Authentication);
 			For<IUserStore<WindyUser, int>>().Use<WindyUserStore>();
 
 			//Database.SetInitializer<WindyContext>(null);
-        }
+		}
 
-        #endregion
-    }
+		#endregion
+	}
 }

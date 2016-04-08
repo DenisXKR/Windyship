@@ -1,17 +1,19 @@
-﻿using System;
+﻿using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.AspNet.Identity;
+using Windyship.Api.Model.Account;
+using Windyship.Api.Model.UserModels.Social;
+using Windyship.Api.Models.Api.v1.UserModels.Social;
 using Windyship.Api.Services.IdentitySvc;
 using Windyship.Api.Site.Services.IdentitySvc;
-using Windyship.Api.Model.Account;
+using Windyship.Core;
 using Windyship.Entities;
-using Windyship.Api.Models.Api.v1.UserModels.Social;
-using Microsoft.AspNet.Identity.Owin;
 using Windyship.Repositories;
 
 namespace Windyship.Api.Controllers
@@ -22,8 +24,9 @@ namespace Windyship.Api.Controllers
 		private IWindySignInManager _signInManager;
 		private IWindyUserManager _userManager;
 		private IUserRepository _userRepository;
+		private IUnitOfWork _unitOfWork;
 
-		public AccountController(IWindySignInManager signInManager, IWindyUserManager userManager, IUserRepository userRepository)
+		public AccountController(IWindySignInManager signInManager, IWindyUserManager userManager, IUserRepository userRepository, IUnitOfWork unitOfWork)
 		{
 			if (signInManager == null)
 			{
@@ -37,10 +40,15 @@ namespace Windyship.Api.Controllers
 			{
 				throw new ArgumentNullException("userRepository");
 			}
+			if (unitOfWork == null)
+			{
+				throw new ArgumentNullException("unitOfWork");
+			}
 
 			_signInManager = signInManager;
 			_userManager = userManager;
 			_userRepository = userRepository;
+			_unitOfWork = unitOfWork;
 		}
 
 		[Route("createAccount")]
@@ -48,48 +56,59 @@ namespace Windyship.Api.Controllers
 		[HttpPost]
 		public async Task<IHttpActionResult> CreateAccount(CreateAccountRequest model)
 		{
-			if (User.Identity.IsAuthenticated)
-			{
-				var userId = User.Identity.GetUserId<int>();
+			WindyUser user = await _userManager.FindByNameAsync(model.Mobile.Trim());
 
-				var user = await _userManager.GetUserById(userId);
-				if (string.Compare(model.Email, user.UserName) == 0) return ApiResult(false);//Not changed
-			}
-			else
+			if (user == null)
 			{
-				var user = await _userManager.FindByNameAsync(model.Mobile);
-
-				if (user == null)
+				user = new WindyUser
 				{
-					user = new WindyUser
-					{
-						Role = UserRole.User,
-						UserName = model.Mobile,
-						Email = model.Email,
-						FirstName = model.Name
-					};
+					Role = UserRole.User,
+					UserName = model.Mobile.Trim(),
+					Email = model.Email,
+					FirstName = model.Name,
+					IsActive = false,
+				};
 
-					var provider = new MultipartMemoryStreamProvider();
-					await Request.Content.ReadAsMultipartAsync(provider);
-
-					foreach (var file in provider.Contents)
-					{
-						var data = await file.ReadAsByteArrayAsync();
-						user.Avatar = data;
-						user.AvatarAddedUtc = DateTime.Now;
-						continue;
-					}
-
-					var result = await _userManager.CreateAsync(user, "*");
-					if (result.Succeeded)
-					{
-						await _userManager.SendCheckPhoneCode(user.UserName);
-						return ApiResult(true);
-					}
+				var result = await _userManager.CreateAsync(user, "*");
+				if (result.Succeeded)
+				{
+					await _userManager.SendCheckPhoneCode(user.UserName);
+					return ApiResult(true, user.SecurityStamp);
 				}
+
+				else ApiResult(false, result.Errors);
+			}
+			else if (!user.IsActive)
+			{
+				user.Role = UserRole.User;
+				user.UserName = model.Mobile.Trim();
+				user.Email = model.Email;
+				user.FirstName = model.Name;
+				user.IsActive = false;
+
+				await _userManager.UpdateUser(user);
+				await _userManager.SendCheckPhoneCode(user.UserName);
+				return ApiResult(true, user.SecurityStamp);
 			}
 
 			return ApiResult(false);
+		}
+
+		private async Task GetAvatar(WindyUser user, string fieldName)
+		{
+			if (!Request.Content.IsMimeMultipartContent())
+			{
+				var provider = new MultipartMemoryStreamProvider();
+				await Request.Content.ReadAsMultipartAsync(provider);
+
+				foreach (var file in provider.Contents)
+				{
+					if (string.Compare(file.Headers.ContentDisposition.Name, fieldName, true) == 0) continue;
+					var data = await file.ReadAsByteArrayAsync();
+					user.Avatar = data;
+					user.AvatarAddedUtc = DateTime.Now;
+				}
+			}
 		}
 
 		[Route("login")]
@@ -97,11 +116,11 @@ namespace Windyship.Api.Controllers
 		[HttpPost]
 		public async Task<IHttpActionResult> Login(LoginRequest model)
 		{
-			var user = _userManager.FindByNameAsync(model.Mobile);
+			var user = await _userManager.FindByNameAsync(model.Mobile);
 
 			if (user == null)
 			{
-				return Ok(ApiResult(false));
+				return ApiResult(false);
 			}
 
 			await _userManager.SendCheckPhoneCode(model.Mobile);
@@ -123,8 +142,8 @@ namespace Windyship.Api.Controllers
 					email = user.Email,
 					user_name = user.FirstName,
 					mobile = user.Phone,
-					image = string.Format("/Image/Avatar?id={0}", user.Id),
-					access_token = user.FacebookId ?? user.TwitterId
+					image = user.Avatar == null ? null : string.Format("/Image/Avatar?id={0}", user.Id),
+					access_token = user.TwitterId ?? user.FacebookId
 				});
 			}
 
@@ -134,15 +153,104 @@ namespace Windyship.Api.Controllers
 		[HttpPost]
 		[AllowAnonymous]
 		[Route("creatBySocial")]
-		public async Task<IHttpActionResult> SocialLoginCallback(SocialTokenRequest request)
+		public async Task<IHttpActionResult> CreatBySocial(CreatSocialRequest request)
 		{
-			SignInStatus result = SignInStatus.Failure;
+			var user = await _userManager.FindByNameAsync(request.Mobile);
 
-			switch (request.type)
+			if (user == null)
 			{
-				case "facebook": result = await _signInManager.FbLoginAsync(request.social_id, true); break;
-				case "twitter": result = await _signInManager.TwLoginAsync(request.social_id, true); break;
+				user = new WindyUser
+				{
+					Role = UserRole.User,
+					UserName = request.Mobile.Trim(),
+					Email = request.Email,
+					FirstName = request.User_name,
+					IsActive = false,
+					TwitterId = request.Type == "twitter" ? request.Social_id : null,
+					FacebookId = request.Type == "facebook" ? request.Social_id : null
+				};
+
+				var idResult = await _userManager.CreateAsync(user, "*");
+				if (!idResult.Succeeded) return ApiResult(false, idResult.Errors);
 			}
+			else
+			{
+				user.Email = request.Email;
+				user.FirstName = request.User_name;
+				user.TwitterId = request.Type == "twitter" ? request.Social_id : null;
+				user.FacebookId = request.Type == "facebook" ? request.Social_id : null;
+
+				await _userManager.UpdateUser(user);
+				return ApiResult(true);
+			}
+
+			await _userManager.SendCheckPhoneCode(request.Mobile);
+			return ApiResult(true, user.SecurityStamp);
+		}
+
+		[HttpPost, AllowAnonymous]
+		[Route("UploadAvatar")]
+		public async Task<IHttpActionResult> UploadAvatar([FromUri] string token)
+		{
+			var user = await _userRepository.GetFirstOrDefaultAsync(u => u.SecurityStamp == token);
+
+			if (user == null) return ApiResult(false);
+
+			if (Request.Content.IsMimeMultipartContent())
+			{
+				var provider = new MultipartMemoryStreamProvider();
+				await Request.Content.ReadAsMultipartAsync(provider);
+
+				foreach (var file in provider.Contents)
+				{
+					if (string.Compare(file.Headers.ContentDisposition.Name, "avatar", true) == 0) continue;
+					var data = await file.ReadAsByteArrayAsync();
+					user.Avatar = data;
+					user.AvatarAddedUtc = DateTime.Now;
+				}
+
+				await _unitOfWork.SaveChangesAsync();
+				return ApiResult(true);
+			}
+
+			return ApiResult(false);
+		}
+
+		[HttpPost]
+		[Route("UploadAvatar")]
+		public async Task<IHttpActionResult> UploadAvatar()
+		{
+			var id = User.Identity.GetUserId<int>();
+			var user = await _userRepository.GetFirstOrDefaultAsync(u => u.Id == id);
+
+			if (user == null) return ApiResult(false);
+
+			if (Request.Content.IsMimeMultipartContent())
+			{
+				var provider = new MultipartMemoryStreamProvider();
+				await Request.Content.ReadAsMultipartAsync(provider);
+
+				foreach (var file in provider.Contents)
+				{
+					if (string.Compare(file.Headers.ContentDisposition.Name, "avatar", true) == 0) continue;
+					var data = await file.ReadAsByteArrayAsync();
+					user.Avatar = data;
+					user.AvatarAddedUtc = DateTime.Now;
+				}
+
+				await _unitOfWork.SaveChangesAsync();
+				return ApiResult(true);
+			}
+
+			return ApiResult(false);
+		}
+
+		[HttpPost]
+		[AllowAnonymous]
+		[Route("FbLoginCallback")]
+		public async Task<IHttpActionResult> FblLoginCallback(SocialTokenRequest request)
+		{
+			SignInStatus result = result = await _signInManager.FbLoginAsync(request.social_id, true);
 
 			if (result == SignInStatus.Success)
 			{
@@ -155,10 +263,29 @@ namespace Windyship.Api.Controllers
 			return ApiResult(false);
 		}
 
-		[Route("logout")]
 		[HttpPost]
+		[AllowAnonymous]
+		[Route("TwLoginCallback")]
+		public async Task<IHttpActionResult> TwlLoginCallback(SocialTokenRequest request)
+		{
+			SignInStatus result = await _signInManager.TwLoginAsync(request.social_id, true);
+
+			if (result == SignInStatus.Success)
+			{
+				var userId = User.Identity.GetUserId<int>();
+				var user = await _userManager.GetUserById(userId);
+
+				return ApiResult(true);
+			}
+
+			return ApiResult(false);
+		}
+
+		[Route("TestMethod")]
+		[HttpGet]
 		public IHttpActionResult Logout()
 		{
+			var userId = User.Identity.GetUserId<int>();
 			_signInManager.SignOut();
 			return ApiResult(true);
 		}
@@ -171,7 +298,7 @@ namespace Windyship.Api.Controllers
 
 			if (user == null)
 			{
-				return Ok(ApiResult(false));
+				return ApiResult(false);
 			}
 
 			if (DateTime.Now - user.CodeLastSentTime < TimeSpan.FromMinutes(1)) return ApiResult(false);
@@ -185,13 +312,11 @@ namespace Windyship.Api.Controllers
 		[HttpPost]
 		public async Task<IHttpActionResult> CheckVerificationCode(ConfirmPhoneRequest model)
 		{
-			//var result = await _userManager.ConfirmPhoneAsync(model.Mobile, model.Code);
-			var result = await _userManager.ConfirmPhoneAsync(model.Mobile, "1234"); //Test
+			var result = await _userManager.ConfirmPhoneAsync(model.Mobile, model.Code);
 
 			if (result.Succeeded)
 			{
 				var user = await _userManager.FindByNameAsync(model.Mobile);
-				await _signInManager.SignInAsync(user, true, true);
 
 				return ApiResult(true, new
 				{
@@ -199,12 +324,71 @@ namespace Windyship.Api.Controllers
 					email = user.Email,
 					user_name = user.FirstName,
 					mobile = user.UserName,
-					image = string.Format("/Image/Avatar?id={0}", user.Id),
-					access_token = user.FacebookId ?? user.TwitterId
+					image = user.Avatar == null ? null : string.Format("/Image/Avatar?id={0}", user.Id),
+					access_token = user.Token
 				});
 			}
 
 			return ApiResult(false);
 		}
+
+		[Route("addMobile"), HttpPost]
+		public async Task<IHttpActionResult> AddMobile(string mobile)
+		{
+			try
+			{
+				var id = User.Identity.GetUserId<int>();
+				var user = await _userRepository.GetFirstOrDefaultAsync(u => u.Id == id);
+				user.Phone = mobile;
+				await _unitOfWork.SaveChangesAsync();
+			}
+			catch (Exception ex)
+			{
+				return ApiResult(false, ex.Message);
+			}
+
+			return ApiResult(true);
+		}
+
+		[Route("updateProfile"), HttpPost]
+		public async Task<IHttpActionResult> UpdateProfile(string username)
+		{
+			try
+			{
+				var id = User.Identity.GetUserId<int>();
+				var user = await _userRepository.GetFirstOrDefaultAsync(u => u.Id == id);
+				user.FirstName = username;
+				await _unitOfWork.SaveChangesAsync();
+			}
+			catch (Exception ex)
+			{
+				return ApiResult(false, ex.Message);
+			}
+
+			return ApiResult(true);
+		}
+
+		#region System
+
+		[Route("getusers")]
+		[AllowAnonymous]
+		[HttpGet]
+		public IHttpActionResult GetUsers()
+		{
+			var result = _userRepository.All();
+			return ApiResult(true, result);
+		}
+
+		[Route("DelAllUsers")]
+		[AllowAnonymous]
+		[HttpGet]
+		public async Task<IHttpActionResult> DelAllUsers()
+		{
+			_userRepository.RemoveRange(u => true);
+			await _unitOfWork.SaveChangesAsync();
+			return ApiResult(true);
+		}
+
+		#endregion
 	}
 }

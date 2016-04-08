@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit http://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA6Ev4BcFP20uFtkY1eRWl7AAAAAACAAAAAAAQZgAAAAEAACAAAAAul1+h5ksJQkDPAY+AGJJU0LKpGYpRBqVY+LRsUeLuSAAAAAAOgAAAAAIAACAAAAAjHtyNt4VYfFfMO6NiT8fZFuQmJa5tvjQ1rRRzR8h5aiAAAAAVL+1pjWC/nWFORyu37HV/rKr9lyZmY2V+hqsfmov0W0AAAADx+x1VHXI4NQE50o2xHvTJJPUzkipR34NRxYdb8e1KQwjGkkUz8BDOGonNS6h9/iEKMusmVe7qzb7GAg3q8blo</EncryptedPassword>
+    <_PublishTargetUrl>ftp://108.179.198.227/httpdocs</_PublishTargetUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <File Include="App_Readme/Elmah.txt">
+      <publishTime>04/05/2016 12:26:04</publishTime>
+    </File>
+    <File Include="bin/Elmah.dll">
+      <publishTime>04/05/2016 12:26:03</publishTime>
+    </File>
+    <File Include="bin/Elmah.Mvc.dll">
+      <publishTime>04/05/2016 12:26:08</publishTime>
+    </File>
+    <File Include="bin/EntityFramework.dll">
+      <publishTime>04/02/2016 11:34:57</publishTime>
+    </File>
+    <File Include="bin/EntityFramework.SqlServer.dll">
+      <publishTime>04/02/2016 11:34:57</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AspNet.Identity.Core.dll">
+      <publishTime>04/02/2016 11:34:57</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AspNet.Identity.EntityFramework.dll">
+      <publishTime>04/02/2016 11:34:57</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AspNet.Identity.Owin.dll">
+      <publishTime>04/02/2016 11:35:35</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Cors.dll">
+      <publishTime>04/06/2016 21:18:40</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.dll">
+      <publishTime>04/02/2016 11:35:10</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Host.SystemWeb.dll">
+      <publishTime>04/02/2016 11:35:10</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Security.Cookies.dll">
+      <publishTime>04/02/2016 11:35:35</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Security.dll">
+      <publishTime>04/02/2016 11:35:47</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Security.Facebook.dll">
+      <publishTime>04/02/2016 11:35:59</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Security.OAuth.dll">
+      <publishTime>04/02/2016 11:35:47</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Security.Twitter.dll">
+      <publishTime>04/02/2016 11:36:08</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Practices.ServiceLocation.dll">
+      <publishTime>04/02/2016 11:40:49</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Web.Infrastructure.dll">
+      <publishTime>04/02/2016 11:40:49</publishTime>
+    </File>
+    <File Include="bin/Newtonsoft.Json.dll">
+      <publishTime>04/07/2016 08:52:33</publishTime>
+    </File>
+    <File Include="bin/Owin.dll">
+      <publishTime>04/02/2016 11:35:10</publishTime>
+    </File>
+    <File Include="bin/RestSharp.dll">
+      <publishTime>04/02/2016 14:06:15</publishTime>
+    </File>
+    <File Include="bin/StructureMap.dll">
+      <publishTime>04/02/2016 11:40:49</publishTime>
+    </File>
+    <File Include="bin/StructureMap.Net4.dll">
+      <publishTime>04/02/2016 11:40:49</publishTime>
+    </File>
+    <File Include="bin/StructureMap.Web.dll">
+      <publishTime>04/02/2016 11:40:58</publishTime>
+    </File>
+    <File Include="bin/System.IdentityModel.Tokens.ValidatingIssuerNameRegistry.dll">
+      <publishTime>04/06/2016 21:21:12</publishTime>
+    </File>
+    <File Include="bin/System.Net.Http.Formatting.dll">
+      <publishTime>04/02/2016 11:41:13</publishTime>
+    </File>
+    <File Include="bin/System.Web.Cors.dll">
+      <publishTime>04/06/2016 21:18:40</publishTime>
+    </File>
+    <File Include="bin/System.Web.Helpers.dll">
+      <publishTime>04/03/2016 14:46:08</publishTime>
+    </File>
+    <File Include="bin/System.Web.Http.dll">
+      <publishTime>04/02/2016 11:41:13</publishTime>
+    </File>
+    <File Include="bin/System.Web.Http.Owin.dll">
+      <publishTime>04/06/2016 21:18:59</publishTime>
+    </File>
+    <File Include="bin/System.Web.Http.WebHost.dll">
+      <publishTime>04/02/2016 11:41:13</publishTime>
+    </File>
+    <File Include="bin/System.Web.Mvc.dll">
+      <publishTime>04/03/2016 14:46:08</publishTime>
+    </File>
+    <File Include="bin/System.Web.Razor.dll">
+      <publishTime>04/03/2016 14:46:08</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.Deployment.dll">
+      <publishTime>04/03/2016 14:46:08</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.dll">
+      <publishTime>04/03/2016 14:46:08</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.Razor.dll">
+      <publishTime>04/03/2016 14:46:08</publishTime>
+    </File>
+    <File Include="bin/WebActivatorEx.dll">
+      <publishTime>04/02/2016 11:40:49</publishTime>
+    </File>
+    <File Include="bin/Windyship.Api.dll">
+      <publishTime>04/08/2016 17:27:23</publishTime>
+    </File>
+    <File Include="bin/Windyship.dll">
+      <publishTime>04/08/2016 16:53:06</publishTime>
+    </File>
+    <File Include="Global.asax">
+      <publishTime>04/02/2016 11:32:59</publishTime>
+    </File>
+    <File Include="packages.config">
+      <publishTime>04/07/2016 08:50:04</publishTime>
+    </File>
+    <File Include="Web.config">
+      <publishTime>04/08/2016 16:53:15</publishTime>
+    </File>
+  </ItemGroup>
+</Project>

@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using LoginModule.Services.IdentitySvc.Social;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
-using Windyship.Api.Services.IdentitySvc.Social;
-using Windyship.Identity;
-using Windyship.Entities;
+using System;
+using System.Threading.Tasks;
 using Windyship.Api.Models.Api.v1.UserModels.Social;
-using LoginModule.Services.IdentitySvc.Social;
-
+using Windyship.Api.Services.IdentitySvc.Social;
+using Windyship.Entities;
+using Windyship.Identity;
 
 namespace Windyship.Api.Services.IdentitySvc
 {
@@ -26,9 +23,13 @@ namespace Windyship.Api.Services.IdentitySvc
 			return AuthenticationManager.GetExternalLoginInfoAsync();
 		}
 
-		public Task<SignInStatus> PasswordSignInAsync(string userName, string password, bool isPersistent)
+		public async Task<string> TokenSignIn(WindyUser user)
 		{
-			return PasswordSignInAsync(userName, password, isPersistent, false);
+			await this.SignInAsync(user, true, true);
+			var token = await this.UserManager.GenerateUserTokenAsync("login", user.Id);
+			user.Token = token;
+			await UserManager.UpdateAsync(user);
+			return token;
 		}
 
 		public void SignOut()

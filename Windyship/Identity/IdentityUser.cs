@@ -11,6 +11,7 @@ namespace Windyship.Identity
 		public string Email { get; set; }
 		public string PasswordHash { get; set; }
 		public string SecurityStamp { get; set; }
+		public string Token { get; set; }
 		public string EmailCode { get; set; }
 		public bool EmailConfirmed { get; set; }
 		public string FirstName { get; set; }
@@ -35,6 +36,7 @@ namespace Windyship.Identity
 				Email = Email,
 				PasswordHash = PasswordHash,
 				SecurityStamp = SecurityStamp,
+				Token = Token,
 				EmailCode = EmailCode,
 				EmailChecked = EmailConfirmed,
 				FirstName = FirstName,
@@ -61,6 +63,7 @@ namespace Windyship.Identity
 				Id = user.Id,
 				Email = user.Email,
 				PasswordHash = user.PasswordHash,
+				Token = user.Token,
 				SecurityStamp = user.SecurityStamp,
 				EmailCode = user.EmailCode,
 				EmailConfirmed = user.EmailChecked,

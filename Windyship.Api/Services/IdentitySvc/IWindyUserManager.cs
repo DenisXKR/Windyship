@@ -14,5 +14,6 @@ namespace Windyship.Api.Site.Services.IdentitySvc
 		Task<WindyUser> FindByNameAsync(string userName);
 		Task<bool> IsAccountConfirmedAsync(string phone);
 		Task<WindyUser> GetUserById(int userId);
+		Task UpdateUser(WindyUser user);
 	}
 }

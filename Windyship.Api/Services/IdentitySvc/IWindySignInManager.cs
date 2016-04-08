@@ -6,11 +6,11 @@ namespace Windyship.Api.Services.IdentitySvc
 	public interface IWindySignInManager
 	{
 		Task<ExternalLoginInfo> GetExternalLoginInfoAsync();
-		Task<SignInStatus> PasswordSignInAsync(string userName, string password, bool isPersistent);
 		Task<SignInStatus> ExternalLoginAsync(ExternalLoginInfo loginInfo, bool isPersistent);
 		Task<SignInStatus> TwLoginAsync(string code, bool isPersistent);
 		Task<SignInStatus> FbLoginAsync(string code, bool isPersistent);
 		Task SignInAsync(WindyUser user, bool isPersistent, bool rememberBrowser);
+		Task<string> TokenSignIn(WindyUser user);
 		void SignOut();
 	}
 }

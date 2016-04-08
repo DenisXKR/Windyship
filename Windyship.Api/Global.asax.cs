@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CarGet.Web.Site;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -11,7 +12,8 @@ namespace Windyship.Api
     {
         protected void Application_Start()
         {
-            GlobalConfiguration.Configure(WebApiConfig.Register);
+			GlobalConfiguration.Configure(WebApiConfig.Register);
+			RouteConfig.RegisterRoutes(RouteTable.Routes);
         }
     }
 }
