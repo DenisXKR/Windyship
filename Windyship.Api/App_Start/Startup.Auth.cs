@@ -1,8 +1,8 @@
 ﻿using LoginModule;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
-using Microsoft.Owin.Security.OAuth;
-using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Cors;
 using Microsoft.Owin.Security.DataProtection;
 using Microsoft.Owin.Security.Facebook;
 using Microsoft.Owin.Security.OAuth;
@@ -11,13 +11,11 @@ using Owin;
 using System;
 using System.Web.Configuration;
 using Windyship.Api.Services.IdentitySvc;
-using Windyship.Repositories;
-using Microsoft.Owin.Cors;
-using Microsoft.AspNet.Identity.Owin;
-using Windyship.Dal;
-using Windyship.Entities;
-using Windyship.Dal.Core;
 using Windyship.Core;
+using Windyship.Dal;
+using Windyship.Dal.Core;
+using Windyship.Entities;
+using Windyship.Repositories;
 
 [assembly: OwinStartup(typeof(OwinStart))]
 namespace LoginModule

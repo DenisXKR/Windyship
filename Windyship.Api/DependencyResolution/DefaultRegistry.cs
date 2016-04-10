@@ -52,7 +52,11 @@ namespace Windyship.Api.DependencyResolution
 			For<IDataContext<Category, int>>().Use<DataContext<Category, int>>();
 			For<IDataContext<LocationTo, int>>().Use<DataContext<LocationTo, int>>();
 			For<IDataContext<LocationFrom, int>>().Use<DataContext<LocationFrom, int>>();
+			For<IDataContext<TravelTo, int>>().Use<DataContext<TravelTo, int>>();
+			For<IDataContext<TravelFrom, int>>().Use<DataContext<TravelFrom, int>>();
+			For<IDataContext<DisabledCategories, int>>().Use<DataContext<DisabledCategories, int>>();
 
+			For<IDataContext<CarryTravel, int>>().Use<DataContext<CarryTravel, int>>();
 			For<IDataContext<Shipment, int>>().Use<DataContext<Shipment, int>>();
 
 			For<IUserRepository>().Use<UserRepository>();
@@ -62,8 +66,12 @@ namespace Windyship.Api.DependencyResolution
 			For<ICategoryRepository>().Use<CategoryRepository>();
 			For<ILocationToRepository>().Use<LocationToRepository>();
 			For<ILocationFromRepository>().Use<LocationFromRepository>();
+			For<ITravelFromRepository>().Use<TravelFromRepository>();
+			For<ITravelToRepository>().Use<TravelToRepository>();
+			For<ICategoryRepository>().Use<CategoryRepository>();
 
 			For<IShipmentRepository>().Use<ShipmentRepository>();
+			For<ICarryTravelRepository>().Use<CarryTravelRepository>();
 
 			For<UserManager<WindyUser, int>>().Use<WindyUserManager>();
 			For<IAuthenticationManager>().Use(() => HttpContext.Current.GetOwinContext().Authentication);

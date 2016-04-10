@@ -212,6 +212,8 @@
     <Compile Include="Model\Common\DateTestModel.cs" />
     <Compile Include="Model\Common\Distance.cs" />
     <Compile Include="Model\Common\LocationViewModel.cs" />
+    <Compile Include="Model\Shipments\CarryTravelViewModel.cs" />
+    <Compile Include="Model\Shipments\DeleteTravelRequest.cs" />
     <Compile Include="Model\Shipments\DeleteShipmentRequest.cs" />
     <Compile Include="Model\Shipments\ShipmentRequest.cs" />
     <Compile Include="Model\UserModels\AvatarUploadResponse.cs" />
