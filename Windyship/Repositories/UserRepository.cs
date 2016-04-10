@@ -1,10 +1,8 @@
 ﻿using System.Threading.Tasks;
-using System.Data.Entity;
-using System.Linq;
-using Windyship.Dal.Core;
-using Windyship.Identity;
-using Windyship.Entities;
 using Windyship.Core;
+using Windyship.Dal.Core;
+using Windyship.Entities;
+using Windyship.Identity;
 
 namespace Windyship.Repositories
 {

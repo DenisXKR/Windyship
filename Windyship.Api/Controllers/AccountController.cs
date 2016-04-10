@@ -264,15 +264,6 @@ namespace Windyship.Api.Controllers
 			return ApiResult(false);
 		}
 
-		[Route("TestMethod")]
-		[HttpGet]
-		public IHttpActionResult Logout()
-		{
-			var userId = User.Identity.GetUserId<int>();
-			_signInManager.SignOut();
-			return ApiResult(true);
-		}
-
 		[Route("resendVerificationCode")]
 		[HttpPost, AllowAnonymous]
 		public async Task<IHttpActionResult> SendVerificationCode(LoginRequest model)

@@ -209,8 +209,10 @@
     <Compile Include="Model\Account\LoginRequest.cs" />
     <Compile Include="Model\Account\UserRequestViewModel.cs" />
     <Compile Include="Model\Api\ApiResponse.cs" />
+    <Compile Include="Model\Common\DateTestModel.cs" />
     <Compile Include="Model\Common\Distance.cs" />
     <Compile Include="Model\Common\LocationViewModel.cs" />
+    <Compile Include="Model\Shipments\DeleteShipmentRequest.cs" />
     <Compile Include="Model\Shipments\ShipmentRequest.cs" />
     <Compile Include="Model\UserModels\AvatarUploadResponse.cs" />
     <Compile Include="Model\UserModels\AvatarUploadResponseCode.cs" />

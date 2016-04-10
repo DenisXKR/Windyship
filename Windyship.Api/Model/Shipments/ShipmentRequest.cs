@@ -10,6 +10,11 @@ namespace Windyship.Api.Model.Shipments
 {
 	public class ShipmentRequest
 	{
+		public ShipmentRequest()
+		{
+
+		}
+
 		public ShipmentRequest(Shipment entity)
 		{
 			this.Id = entity.Id;

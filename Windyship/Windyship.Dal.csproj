@@ -50,12 +50,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\CarryTravel.cs" />
     <Compile Include="Entities\Category.cs" />
     <Compile Include="Entities\Content.cs" />
     <Compile Include="Entities\ContentPart.cs" />
+    <Compile Include="Entities\DisabledCategories.cs" />
     <Compile Include="Entities\Faq.cs" />
     <Compile Include="Entities\Language.cs" />
+    <Compile Include="Entities\TravelFrom.cs" />
     <Compile Include="Entities\LocationFrom.cs" />
+    <Compile Include="Entities\TravelTo.cs" />
     <Compile Include="Entities\LocationTo.cs" />
     <Compile Include="Entities\Shipment.cs" />
     <Compile Include="Entities\UserRequest.cs" />
@@ -71,13 +75,18 @@
     <Compile Include="Repositories\CategoryRepository.cs" />
     <Compile Include="Repositories\ContentRepository.cs" />
     <Compile Include="Repositories\FaqRepository.cs" />
+    <Compile Include="Repositories\IDisabledCategoriesRepository.cs" />
     <Compile Include="Repositories\ICategorieRepository.cs" />
     <Compile Include="Repositories\IContentRepository.cs" />
     <Compile Include="Repositories\IFaqRepository.cs" />
+    <Compile Include="Repositories\ITravelToRepository.cs" />
+    <Compile Include="Repositories\ITravelFromepository.cs" />
     <Compile Include="Repositories\ILocationFromRepository.cs" />
     <Compile Include="Repositories\ILocationToRepository.cs" />
     <Compile Include="Repositories\IShipmentRepository.cs" />
     <Compile Include="Repositories\IUserRequestRepository.cs" />
+    <Compile Include="Repositories\DisabledCategoriesRepository.cs" />
+    <Compile Include="Repositories\TravelFromRepository.cs" />
     <Compile Include="Repositories\LocationFromRepository.cs" />
     <Compile Include="Repositories\LocationToRepository.cs" />
     <Compile Include="Repositories\ShipmentRepository.cs" />

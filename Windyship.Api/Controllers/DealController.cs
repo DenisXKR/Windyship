@@ -73,16 +73,22 @@ namespace Windyship.Api.Controllers
 
 				await _unitOfWork.SaveChangesAsync();
 
-				foreach (var loc in request.To)
+				if (request.To != null)
 				{
-					var locationTo = new LocationTo { Lat = loc.Lat, Long = loc.Long, ShipmentId = shipment.Id };
-					_locationToRepository.Add(locationTo);
+					foreach (var loc in request.To)
+					{
+						var locationTo = new LocationTo { Lat = loc.Lat, Long = loc.Long, ShipmentId = shipment.Id };
+						_locationToRepository.Add(locationTo);
+					}
 				}
 
-				foreach (var loc in request.From)
+				if (request.From != null)
 				{
-					var locationFrom = new LocationFrom { Lat = loc.Lat, Long = loc.Long, ShipmentId = shipment.Id };
-					_locationFromRepository.Add(locationFrom);
+					foreach (var loc in request.From)
+					{
+						var locationFrom = new LocationFrom { Lat = loc.Lat, Long = loc.Long, ShipmentId = shipment.Id };
+						_locationFromRepository.Add(locationFrom);
+					}
 				}
 
 				await _unitOfWork.SaveChangesAsync();
@@ -123,18 +129,24 @@ namespace Windyship.Api.Controllers
 					_shipmentRepository.Update(shipment);
 					_locationToRepository.RemoveRange(l => l.ShipmentId == shipment.Id);
 
-					foreach (var loc in request.To)
+					if (request.To != null)
 					{
-						var locationTo = new LocationTo { Lat = loc.Lat, Long = loc.Long, ShipmentId = shipment.Id };
-						_locationToRepository.Add(locationTo);
+						foreach (var loc in request.To)
+						{
+							var locationTo = new LocationTo { Lat = loc.Lat, Long = loc.Long, ShipmentId = shipment.Id };
+							_locationToRepository.Add(locationTo);
+						}
 					}
 
 					_locationFromRepository.RemoveRange(l => l.ShipmentId == shipment.Id);
 
-					foreach (var loc in request.From)
+					if (request.From != null)
 					{
-						var locationFrom = new LocationFrom { Lat = loc.Lat, Long = loc.Long, ShipmentId = shipment.Id };
-						_locationFromRepository.Add(locationFrom);
+						foreach (var loc in request.From)
+						{
+							var locationFrom = new LocationFrom { Lat = loc.Lat, Long = loc.Long, ShipmentId = shipment.Id };
+							_locationFromRepository.Add(locationFrom);
+						}
 					}
 
 					await _unitOfWork.SaveChangesAsync();
@@ -146,13 +158,13 @@ namespace Windyship.Api.Controllers
 		}
 
 		[Route("deleteShipment"), HttpPost]
-		public async Task<IHttpActionResult> DeleteShipment(int shipment_id)
+		public async Task<IHttpActionResult> DeleteShipment(DeleteShipmentRequest request)
 		{
 			try
 			{
-				_locationToRepository.RemoveRange(l => l.ShipmentId == shipment_id);
-				_locationFromRepository.RemoveRange(l => l.ShipmentId == shipment_id);
-				_shipmentRepository.RemoveRange(s => s.Id == shipment_id);
+				_locationToRepository.RemoveRange(l => l.ShipmentId == request.Shipment_id);
+				_locationFromRepository.RemoveRange(l => l.ShipmentId == request.Shipment_id);
+				_shipmentRepository.RemoveRange(s => s.Id == request.Shipment_id);
 
 				await _unitOfWork.SaveChangesAsync();
 
@@ -202,5 +214,8 @@ namespace Windyship.Api.Controllers
 
 			return ApiResult(true);
 		}
+
+
+
 	}
 }

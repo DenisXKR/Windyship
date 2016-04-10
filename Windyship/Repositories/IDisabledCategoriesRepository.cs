@@ -3,7 +3,7 @@ using Windyship.Entities;
 
 namespace Windyship.Repositories
 {
-	public interface IShipmentRepository : IRepositoryBase<Shipment, int>
+	public interface ICategoryRepository : IRepositoryBase<Category, int>
 	{
 	}
 }
