@@ -13,16 +13,16 @@ namespace OauthTest
 	{
 		static void Main(string[] args)
 		{
-			string baseAddress = "http://localhost:2411";
-			//string baseAddress = "http://windyship.com";
+			//string baseAddress = "http://localhost:2411";
+			string baseAddress = "http://windyship.com";
 
 			using (var client = new HttpClient())
 			{
 				var form = new Dictionary<string, string>    
                {    
                    {"grant_type", "password"},    
-                   {"username", "546456"},    
-                   {"password", "OYAITFZqLhJwkLKBZGaW/uHl6XMY/6h+3p1LEccjgEOKq+St6j90VQfAdp7eOqeLgIPOxiBsPth2NiKfF1IagLgi9AF2/VWhwRMK+jCTRsFg596OE39vmxzJSvFsQQri67PauVJtzQ23U7d6KLFCQQ=="}
+                   {"username", "+54645645"},    
+                   {"password", "lnQfp2wW6OgRyXjRJnPr7iXfU1pd3d74UTEoiW7oWB5kBvSfH5d7dN5voc1rwCVRGraFEpDH8DMnXarwRwTlvMAXVXfApdR3h8iUFvVmOr5vL33hEY6EfJqzoAplgg/o9UagiWNKPB2wNCGpIQtrmw=="}
                };
 
 				try
@@ -47,7 +47,7 @@ namespace OauthTest
 					{
 						httpClient1.BaseAddress = new Uri(baseAddress);
 						httpClient1.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token.access_token);
-						HttpResponseMessage response = httpClient1.GetAsync("/api/getCategories?language=en").Result;
+						HttpResponseMessage response = httpClient1.PostAsync("/api/UploadAvatar", new FormUrlEncodedContent(new Dictionary<string, string>())).Result;
 						if (response.IsSuccessStatusCode)
 						{
 							System.Console.WriteLine("Success");

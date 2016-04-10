@@ -65,7 +65,7 @@ namespace LoginModule
 			{
 				TokenEndpointPath = new PathString("/token"),
 				Provider = new TokenAuthorizationServerProvider(),
-				AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(30),
+				AccessTokenExpireTimeSpan = TimeSpan.FromDays(30),
 				AllowInsecureHttp = true,
 
 			});

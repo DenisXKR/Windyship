@@ -110,6 +110,7 @@
     <Reference Include="StructureMap.Web">
       <HintPath>..\packages\structuremap.web.4.0.0.315\lib\net40\StructureMap.Web.dll</HintPath>
     </Reference>
+    <Reference Include="System.Device" />
     <Reference Include="System.IdentityModel.Tokens.ValidatingIssuerNameRegistry">
       <HintPath>..\packages\System.IdentityModel.Tokens.ValidatingIssuerNameRegistry.4.5.1\lib\net45\System.IdentityModel.Tokens.ValidatingIssuerNameRegistry.dll</HintPath>
     </Reference>
@@ -208,6 +209,7 @@
     <Compile Include="Model\Account\LoginRequest.cs" />
     <Compile Include="Model\Account\UserRequestViewModel.cs" />
     <Compile Include="Model\Api\ApiResponse.cs" />
+    <Compile Include="Model\Common\Distance.cs" />
     <Compile Include="Model\Common\LocationViewModel.cs" />
     <Compile Include="Model\Shipments\ShipmentRequest.cs" />
     <Compile Include="Model\UserModels\AvatarUploadResponse.cs" />

@@ -1,0 +1,7 @@
+C:\Windyship\OauthTest\bin\Debug\OauthTest.exe.config
+C:\Windyship\OauthTest\bin\Debug\OauthTest.exe
+C:\Windyship\OauthTest\bin\Debug\OauthTest.pdb
+C:\Windyship\OauthTest\bin\Debug\Newtonsoft.Json.dll
+C:\Windyship\OauthTest\obj\Debug\OauthTest.exe
+C:\Windyship\OauthTest\obj\Debug\OauthTest.pdb
+C:\Windyship\OauthTest\obj\Debug\OauthTest.csprojResolveAssemblyReference.cache

@@ -14,6 +14,12 @@ namespace Windyship.Api.Controllers
 			_userRepository = userRepository;
 		}
 
+		public ActionResult Index()
+		{
+			var result = new FilePathResult("~/index.html", "text/html");
+			return result;
+		}
+
 		[AllowAnonymous]
         public async Task<ActionResult> Avatar(int id)
         {

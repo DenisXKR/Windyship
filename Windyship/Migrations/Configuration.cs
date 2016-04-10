@@ -10,6 +10,7 @@ namespace Windyship.Migrations
         public Configuration()
         {
             AutomaticMigrationsEnabled = true;
+			AutomaticMigrationDataLossAllowed = true;
             ContextKey = "Windyship.Dal.WindyContext";
         }
 

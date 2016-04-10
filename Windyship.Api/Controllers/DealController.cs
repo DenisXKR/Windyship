@@ -11,6 +11,7 @@ using Windyship.Repositories;
 using Microsoft.AspNet.Identity;
 using Windyship.Core;
 using Windyship.Api.Model.Common;
+using System.Device.Location;
 
 namespace Windyship.Api.Controllers
 {
@@ -38,10 +39,10 @@ namespace Windyship.Api.Controllers
 		}
 
 		[Route("getCategories"), HttpGet]
-		public async Task<IHttpActionResult> GetCategories([FromUri]string language)
+		public IHttpActionResult GetCategories([FromUri]string language)
 		{
-			var result = await _categoryRepository.GetAllAsync(c => c.Language.ToString() == language);
-			return ApiResult(true, result.Select(c => new { id = c.Id, title = c.Name }));
+			var result = _categoryRepository.All();
+			return ApiResult(true, result.Select(c => new { id = c.Id, title = c.GetName(language) }));
 		}
 
 		[Route("sendShipment"), HttpPost]
@@ -164,9 +165,42 @@ namespace Windyship.Api.Controllers
 		}
 
 		[Route("getRecommendedBudget"), HttpPost]
-		public IHttpActionResult GetRecommendedBudget(LocationViewModel from, LocationViewModel to)
+		public IHttpActionResult GetRecommendedBudget(Distance request)
 		{
-			return ApiResult(true, new { Budget = 20, Currency = "USD" });
+			var geoCoordinate = new GeoCoordinate(Convert.ToDouble(request.From.Lat), Convert.ToDouble(request.From.Long));
+			var distance = geoCoordinate.GetDistanceTo(new GeoCoordinate(Convert.ToDouble(request.To.Lat), Convert.ToDouble(request.To.Long)));
+
+			return ApiResult(true, new { Budget = Math.Round(distance * 0.001), Currency = "USD" });
+		}
+
+		[Route("uploadShipmentImage"), HttpPost]
+		public async Task<IHttpActionResult> UploadShipmentImage([FromUri]int shipmentId, [FromUri]int imageId)
+		{
+			var shipment = await _shipmentRepository.GetFirstOrDefaultAsync(s => s.Id == shipmentId);
+
+			if (shipment == null) return ApiResult(false, "Shipment not found");
+
+			if (!Request.Content.IsMimeMultipartContent())
+			{
+				var provider = new MultipartMemoryStreamProvider();
+				await Request.Content.ReadAsMultipartAsync(provider);
+
+				foreach (var file in provider.Contents)
+				{
+					var data = await file.ReadAsByteArrayAsync();
+
+					switch (imageId)
+					{
+						case 1: shipment.Image1 = data; break;
+						case 2: shipment.Image2 = data; break;
+						case 3: shipment.Image3 = data; break;
+					}
+				}
+
+				await _unitOfWork.SaveChangesAsync();
+			}
+
+			return ApiResult(true);
 		}
 	}
 }

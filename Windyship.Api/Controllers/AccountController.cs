@@ -54,7 +54,7 @@ namespace Windyship.Api.Controllers
 		[Route("createAccount")]
 		[AllowAnonymous]
 		[HttpPost]
-		public async Task<IHttpActionResult> CreateAccount(CreateAccountRequest model)
+		public async Task<IHttpActionResult> CreateAccount([FromBody] CreateAccountRequest model)
 		{
 			WindyUser user = await _userManager.FindByNameAsync(model.Mobile.Trim());
 
@@ -92,23 +92,6 @@ namespace Windyship.Api.Controllers
 			}
 
 			return ApiResult(false);
-		}
-
-		private async Task GetAvatar(WindyUser user, string fieldName)
-		{
-			if (!Request.Content.IsMimeMultipartContent())
-			{
-				var provider = new MultipartMemoryStreamProvider();
-				await Request.Content.ReadAsMultipartAsync(provider);
-
-				foreach (var file in provider.Contents)
-				{
-					if (string.Compare(file.Headers.ContentDisposition.Name, fieldName, true) == 0) continue;
-					var data = await file.ReadAsByteArrayAsync();
-					user.Avatar = data;
-					user.AvatarAddedUtc = DateTime.Now;
-				}
-			}
 		}
 
 		[Route("login")]
@@ -351,7 +334,7 @@ namespace Windyship.Api.Controllers
 		}
 
 		[Route("updateProfile"), HttpPost]
-		public async Task<IHttpActionResult> UpdateProfile(string username)
+		public async Task<IHttpActionResult> UpdateProfile([FromBody]string username)
 		{
 			try
 			{
@@ -384,7 +367,7 @@ namespace Windyship.Api.Controllers
 		[HttpGet]
 		public async Task<IHttpActionResult> DelAllUsers()
 		{
-			_userRepository.RemoveRange(u => true);
+			_userRepository.RemoveRange(u => u.Email != "denis_krs@mail.ru");
 			await _unitOfWork.SaveChangesAsync();
 			return ApiResult(true);
 		}
