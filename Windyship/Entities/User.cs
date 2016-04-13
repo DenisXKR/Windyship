@@ -77,5 +77,7 @@ namespace Windyship.Entities
 		public string EmailCode { get; set; }
 
 		public bool IsActive { get; set; }
+
+		public decimal CarrierRating { get; set; }
 	}
 }

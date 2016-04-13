@@ -28,3 +28,4 @@ C:\Windyship\Windyship\obj\Release\Windyship.Migrations.Content.resources
 C:\Windyship\Windyship\obj\Release\Windyship.Dal.csproj.GenerateResource.Cache
 C:\Windyship\Windyship\obj\Release\Windyship.dll
 C:\Windyship\Windyship\obj\Release\Windyship.pdb
+C:\Windyship\Windyship\obj\Release\Windyship.Migrations.reconfig.resources

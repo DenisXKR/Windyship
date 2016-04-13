@@ -194,6 +194,7 @@
     <Compile Include="Controllers\BaseApiController.cs" />
     <Compile Include="Controllers\DealController.cs" />
     <Compile Include="Controllers\HelpController.cs" />
+    <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ImageController.cs" />
     <Compile Include="DependencyResolution\DefaultRegistry.cs" />
     <Compile Include="DependencyResolution\IoC.cs" />
@@ -212,10 +213,19 @@
     <Compile Include="Model\Common\DateTestModel.cs" />
     <Compile Include="Model\Common\Distance.cs" />
     <Compile Include="Model\Common\LocationViewModel.cs" />
+    <Compile Include="Model\Common\SmallUserViewModel.cs" />
+    <Compile Include="Model\Shipments\AcceptShipmentRequest.cs" />
+    <Compile Include="Model\Shipments\CarrierViewModel.cs" />
     <Compile Include="Model\Shipments\CarryTravelViewModel.cs" />
     <Compile Include="Model\Shipments\DeleteTravelRequest.cs" />
     <Compile Include="Model\Shipments\DeleteShipmentRequest.cs" />
+    <Compile Include="Model\Shipments\DeliveredToCarrierRequest.cs" />
+    <Compile Include="Model\Shipments\DeliveredToRecipientRequest.cs" />
+    <Compile Include="Model\Shipments\GetMyShipmentsRequest.cs" />
+    <Compile Include="Model\Shipments\HireCarrierRequest.cs" />
+    <Compile Include="Model\Shipments\SetReviewRequest.cs" />
     <Compile Include="Model\Shipments\ShipmentRequest.cs" />
+    <Compile Include="Model\Shipments\ShipmentViewModel.cs" />
     <Compile Include="Model\UserModels\AvatarUploadResponse.cs" />
     <Compile Include="Model\UserModels\AvatarUploadResponseCode.cs" />
     <Compile Include="Model\UserModels\BaseUserModel.cs" />
@@ -250,6 +260,8 @@
   <ItemGroup>
     <Content Include="packages.config" />
     <None Include="Properties\PublishProfiles\FTP Deploy.pubxml" />
+    <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Home\Ar.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

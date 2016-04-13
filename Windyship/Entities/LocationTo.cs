@@ -1,4 +1,5 @@
-﻿namespace Windyship.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+namespace Windyship.Entities
 {
 	public class LocationTo : IEntity<int>
 	{
@@ -9,5 +10,6 @@
 		public decimal Lat { get; set; }
 
 		public decimal Long { get; set; }
+
 	}
 }

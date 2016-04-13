@@ -1,5 +1,4 @@
-﻿
-namespace Windyship.Entities
+﻿namespace Windyship.Entities
 {
 	public class Category : IEntity<int>
 	{

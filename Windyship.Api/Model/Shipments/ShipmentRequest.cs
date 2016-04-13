@@ -42,8 +42,7 @@ namespace Windyship.Api.Model.Shipments
 		[Required]
 		public string Title { get; set; }
 
-		[Required]
-		public DateTime Delevery_date { get; set; }
+		public DateTime? Delevery_date { get; set; }
 
 		public IEnumerable<LocationViewModel> From { get; set; }  // location
 

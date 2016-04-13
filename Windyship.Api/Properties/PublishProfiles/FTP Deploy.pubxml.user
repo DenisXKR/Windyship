@@ -61,6 +61,9 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <File Include="bin/Microsoft.Practices.ServiceLocation.dll">
       <publishTime>04/02/2016 11:40:49</publishTime>
     </File>
+    <File Include="bin/Microsoft.Practices.ServiceLocation.pdb">
+      <publishTime>04/02/2016 11:40:49</publishTime>
+    </File>
     <File Include="bin/Microsoft.Web.Infrastructure.dll">
       <publishTime>04/02/2016 11:40:49</publishTime>
     </File>
@@ -79,7 +82,16 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <File Include="bin/StructureMap.Net4.dll">
       <publishTime>04/02/2016 11:40:49</publishTime>
     </File>
+    <File Include="bin/StructureMap.Net4.pdb">
+      <publishTime>04/02/2016 11:40:49</publishTime>
+    </File>
+    <File Include="bin/StructureMap.pdb">
+      <publishTime>04/02/2016 11:40:49</publishTime>
+    </File>
     <File Include="bin/StructureMap.Web.dll">
+      <publishTime>04/02/2016 11:40:58</publishTime>
+    </File>
+    <File Include="bin/StructureMap.Web.pdb">
       <publishTime>04/02/2016 11:40:58</publishTime>
     </File>
     <File Include="bin/System.IdentityModel.Tokens.ValidatingIssuerNameRegistry.dll">
@@ -122,16 +134,28 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>04/02/2016 11:40:49</publishTime>
     </File>
     <File Include="bin/Windyship.Api.dll">
-      <publishTime>04/10/2016 22:40:25</publishTime>
+      <publishTime>04/13/2016 11:09:11</publishTime>
+    </File>
+    <File Include="bin/Windyship.Api.pdb">
+      <publishTime>04/10/2016 23:08:38</publishTime>
     </File>
     <File Include="bin/Windyship.dll">
-      <publishTime>04/10/2016 22:40:25</publishTime>
+      <publishTime>04/13/2016 11:09:10</publishTime>
+    </File>
+    <File Include="bin/Windyship.pdb">
+      <publishTime>04/10/2016 23:08:38</publishTime>
     </File>
     <File Include="Global.asax">
       <publishTime>04/02/2016 11:32:59</publishTime>
     </File>
     <File Include="packages.config">
       <publishTime>04/07/2016 08:50:04</publishTime>
+    </File>
+    <File Include="Views/Home/Ar.cshtml">
+      <publishTime>04/13/2016 09:27:24</publishTime>
+    </File>
+    <File Include="Views/Home/Index.cshtml">
+      <publishTime>04/13/2016 09:16:56</publishTime>
     </File>
     <File Include="Web.config">
       <publishTime>04/10/2016 16:14:40</publishTime>

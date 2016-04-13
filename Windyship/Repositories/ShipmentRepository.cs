@@ -4,9 +4,9 @@ using Windyship.Entities;
 
 namespace Windyship.Repositories
 {
-	public class CarryTravelRepository : RepositoryBase<CarryTravel, int>, ICarryTravelRepository
+	public class ShipmentRepository : RepositoryBase<Shipment, int>, IShipmentRepository
 	{
-		public CarryTravelRepository(IDataContext<CarryTravel, int> context)
+		public ShipmentRepository(IDataContext<Shipment, int> context)
 			: base(context)
 		{
 		}

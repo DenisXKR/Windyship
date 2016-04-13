@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace Windyship.Entities
@@ -9,9 +10,18 @@ namespace Windyship.Entities
 
 		public int UserId { get; set; }
 
+		public int? CarrierId { get; set; }
+
 		public string Title { get; set; }
 
-		public DateTime DeleveryDate { get; set; }
+		public ShipmentStatus ShipmentStatus { get; set; }
+
+		[JsonIgnore]
+		public string PinCode { get; set; }
+
+		public DateTime PostDate { get; set; }
+
+		public DateTime? DeleveryDate { get; set; }
 
 		public byte[] Image1 { get; set; }
 
@@ -43,7 +53,9 @@ namespace Windyship.Entities
 
 		public virtual User User { get; set; }
 
-		public virtual ICollection<LocationTo> From { get; set; }  // location
+		public virtual User Carrier { get; set; }
+
+		public virtual ICollection<LocationFrom> From { get; set; }  // location
 
 		public virtual ICollection<LocationTo> To { get; set; }
 	}

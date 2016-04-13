@@ -58,6 +58,7 @@ namespace Windyship.Api.DependencyResolution
 
 			For<IDataContext<CarryTravel, int>>().Use<DataContext<CarryTravel, int>>();
 			For<IDataContext<Shipment, int>>().Use<DataContext<Shipment, int>>();
+			For<IDataContext<CarrierReview, int>>().Use<DataContext<CarrierReview, int>>();
 
 			For<IUserRepository>().Use<UserRepository>();
 			For<IContentRepository>().Use<ContentRepository>();
@@ -68,7 +69,8 @@ namespace Windyship.Api.DependencyResolution
 			For<ILocationFromRepository>().Use<LocationFromRepository>();
 			For<ITravelFromRepository>().Use<TravelFromRepository>();
 			For<ITravelToRepository>().Use<TravelToRepository>();
-			For<ICategoryRepository>().Use<CategoryRepository>();
+			For<IDisabledCategoriesRepository>().Use<DisabledCategoriesRepository>();
+			For<ICarrierReviewRepository>().Use<CarrierReviewRepository>();
 
 			For<IShipmentRepository>().Use<ShipmentRepository>();
 			For<ICarryTravelRepository>().Use<CarryTravelRepository>();

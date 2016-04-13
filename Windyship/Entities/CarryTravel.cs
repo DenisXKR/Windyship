@@ -19,11 +19,12 @@ namespace Windyship.Entities
 
 		public decimal MaxWeight { get; set; } // number (1...10)
 
+		public virtual User User { get; set; }
+
 		public virtual ICollection<TravelFrom> From { get; set; }  // location
 
 		public virtual ICollection<TravelTo> To { get; set; }
 
 		public virtual ICollection<DisabledCategories> DisabledCategories { get; set; }
-
 	}
 }

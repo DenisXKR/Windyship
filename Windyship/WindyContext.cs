@@ -22,6 +22,8 @@ namespace Windyship.Dal
 		public DbSet<DisabledCategories> DisabledCategories { get; set; }
 		public DbSet<TravelFrom> TravelFrom { get; set; }
 		public DbSet<TravelTo> TravelTo { get; set; }
+		public DbSet<CarryTravel> CarryTravel { get; set; }
+		public DbSet<CarrierReview> CarrierReview { get; set; }
 
 		protected override void OnModelCreating(DbModelBuilder modelBuilder)
 		{

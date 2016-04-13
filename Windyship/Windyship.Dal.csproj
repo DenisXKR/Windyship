@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\CarrierReview.cs" />
     <Compile Include="Entities\CarryTravel.cs" />
     <Compile Include="Entities\Category.cs" />
     <Compile Include="Entities\Content.cs" />
@@ -57,6 +58,7 @@
     <Compile Include="Entities\DisabledCategories.cs" />
     <Compile Include="Entities\Faq.cs" />
     <Compile Include="Entities\Language.cs" />
+    <Compile Include="Entities\ShipmentStatus.cs" />
     <Compile Include="Entities\TravelFrom.cs" />
     <Compile Include="Entities\LocationFrom.cs" />
     <Compile Include="Entities\TravelTo.cs" />
@@ -71,10 +73,16 @@
     <Compile Include="Migrations\201604031302196_Content.Designer.cs">
       <DependentUpon>201604031302196_Content.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201604130806592_reconfig.cs" />
+    <Compile Include="Migrations\201604130806592_reconfig.Designer.cs">
+      <DependentUpon>201604130806592_reconfig.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Repositories\CarrierReviewRepository.cs" />
     <Compile Include="Repositories\CategoryRepository.cs" />
     <Compile Include="Repositories\ContentRepository.cs" />
     <Compile Include="Repositories\FaqRepository.cs" />
+    <Compile Include="Repositories\ICarrierReviewRepository.cs" />
     <Compile Include="Repositories\ICategoryRepository.cs" />
     <Compile Include="Repositories\IDisabledCategoriesRepository.cs" />
     <Compile Include="Repositories\IContentRepository.cs" />
@@ -87,12 +95,12 @@
     <Compile Include="Repositories\IShipmentRepository.cs" />
     <Compile Include="Repositories\IUserRequestRepository.cs" />
     <Compile Include="Repositories\DisabledCategoriesRepository.cs" />
-    <Compile Include="Repositories\ShipmentRepository - Copy.cs" />
+    <Compile Include="Repositories\ShipmentRepository.cs" />
     <Compile Include="Repositories\TravelToRepository.cs" />
     <Compile Include="Repositories\TravelFromRepository.cs" />
     <Compile Include="Repositories\LocationFromRepository.cs" />
     <Compile Include="Repositories\LocationToRepository.cs" />
-    <Compile Include="Repositories\ShipmentRepository.cs" />
+    <Compile Include="Repositories\CarryTravelRepository.cs" />
     <Compile Include="Repositories\UserRequestRepository.cs" />
     <Compile Include="WindyContext.cs" />
     <Compile Include="Core\DataContext.cs" />
@@ -124,6 +132,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201604031302196_Content.resx">
       <DependentUpon>201604031302196_Content.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201604130806592_reconfig.resx">
+      <DependentUpon>201604130806592_reconfig.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
