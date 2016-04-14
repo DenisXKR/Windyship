@@ -13,8 +13,8 @@ namespace OauthTest
 	{
 		static void Main(string[] args)
 		{
-			string baseAddress = "http://localhost:2411";
-			//string baseAddress = "http://windyship.com";
+			//string baseAddress = "http://localhost:2411";
+			string baseAddress = "http://windyship.com";
 
 			using (var client = new HttpClient())
 			{

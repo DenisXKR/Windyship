@@ -65,7 +65,6 @@ namespace LoginModule
 				Provider = new TokenAuthorizationServerProvider(),
 				AccessTokenExpireTimeSpan = TimeSpan.FromDays(30),
 				AllowInsecureHttp = true,
-
 			});
 
 			app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions()); 

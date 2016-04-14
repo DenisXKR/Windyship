@@ -28,6 +28,39 @@ namespace Windyship.Dal
 		protected override void OnModelCreating(DbModelBuilder modelBuilder)
 		{
 			modelBuilder.Conventions.Remove<OneToManyCascadeDeleteConvention>();
+
+			modelBuilder.Entity<LocationTo>()
+				.Property(x => x.Lat)
+				.HasPrecision(9, 6);
+
+			modelBuilder.Entity<LocationTo>()
+				.Property(x => x.Long)
+				.HasPrecision(9, 6);
+
+			modelBuilder.Entity<LocationFrom>()
+				.Property(x => x.Lat)
+				.HasPrecision(9, 6);
+
+			modelBuilder.Entity<LocationFrom>()
+				.Property(x => x.Long)
+				.HasPrecision(9, 6);
+
+			modelBuilder.Entity<TravelFrom>()
+				.Property(x => x.Lat)
+				.HasPrecision(9, 6);
+
+			modelBuilder.Entity<TravelFrom>()
+				.Property(x => x.Long)
+				.HasPrecision(9, 6);
+
+			modelBuilder.Entity<TravelTo>()
+				.Property(x => x.Lat)
+				.HasPrecision(9, 6);
+
+			modelBuilder.Entity<TravelTo>()
+				.Property(x => x.Long)
+				.HasPrecision(9, 6);
+
 			base.OnModelCreating(modelBuilder);
 		}
 	}

@@ -571,7 +571,7 @@ namespace Windyship.Api.Controllers
 				switch (request.Type)
 				{
 					case "interested":
-						shipments =  _shipmentRepository.GetQuery(s => s.CarrierId == id && s.ShipmentStatus == ShipmentStatus.HireCarrier);
+						shipments = _shipmentRepository.GetQuery(s => s.CarrierId == id && s.ShipmentStatus == ShipmentStatus.HireCarrier);
 						break;
 
 					case "in-progress":
@@ -590,7 +590,8 @@ namespace Windyship.Api.Controllers
 				switch (request.Type)
 				{
 					case "requested":
-						shipments = _shipmentRepository.GetQuery(s => s.UserId == id && s.ShipmentStatus == ShipmentStatus.HireCarrier);
+						shipments = _shipmentRepository.GetQuery(s => s.UserId == id &&
+							(s.ShipmentStatus == ShipmentStatus.HireCarrier || s.ShipmentStatus == ShipmentStatus.PostShipmentRequest));
 						break;
 
 					case "in-progress":
@@ -618,12 +619,12 @@ namespace Windyship.Api.Controllers
 				image2 = s.Image2 != null ? string.Format("/Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 2) : null,
 				image3 = s.Image3 != null ? string.Format("/Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 3) : null,
 				post_date = s.PostDate,
-				receiver = new SmallUserViewModel
+				receiver = s.Carrier != null ? new SmallUserViewModel
 				{
 					id = s.Carrier.Id,
 					name = s.Carrier.FirstName,
 					image = s.Carrier.Avatar != null ? string.Format("/Image/Avatar?id={0}", s.Carrier.Id) : null,
-				},
+				} : null,
 				recipiant_mobile = s.RecipiantMobile,
 				recipiant_name = s.RecipiantName,
 				recipiant_secoundary_mobile = s.RecipiantSecoundary_mobile,
