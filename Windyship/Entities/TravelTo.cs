@@ -1,13 +1,17 @@
-﻿namespace Windyship.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+namespace Windyship.Entities
 {
 	public class TravelTo : IEntity<int>
 	{
 		public int Id { get; set; }
 
-		public int TravelId { get; set; }
+		[ForeignKey("CarryTravel")]
+		public int CarryTraveId { get; set; }
 
 		public decimal Lat { get; set; }
 
 		public decimal Long { get; set; }
+
+		public virtual CarryTravel CarryTravel { get; set; }
 	}
 }

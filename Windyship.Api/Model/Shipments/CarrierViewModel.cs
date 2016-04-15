@@ -5,6 +5,8 @@ namespace Windyship.Api.Model.Shipments
 {
 	public class CarrierViewModel
 	{
+		public int TravelId { get; set; }
+
 		public int CarrierId { get; set; }
 
 		public string Name { get; set; }

@@ -29,3 +29,6 @@ C:\Windyship\Windyship\obj\Release\Windyship.Dal.csproj.GenerateResource.Cache
 C:\Windyship\Windyship\obj\Release\Windyship.dll
 C:\Windyship\Windyship\obj\Release\Windyship.pdb
 C:\Windyship\Windyship\obj\Release\Windyship.Migrations.reconfig.resources
+C:\Windyship\Windyship\obj\Release\Windyship.Migrations.CarryTravelRebild.resources
+C:\Windyship\Windyship\obj\Release\Windyship.Migrations.CarryTravelRebild1.resources
+C:\Windyship\Windyship\obj\Release\Windyship.Migrations.CarryTravelRebild2.resources

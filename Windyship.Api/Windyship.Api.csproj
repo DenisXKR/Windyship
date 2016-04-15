@@ -215,6 +215,7 @@
     <Compile Include="Model\Common\LocationViewModel.cs" />
     <Compile Include="Model\Common\SmallUserViewModel.cs" />
     <Compile Include="Model\Shipments\AcceptShipmentRequest.cs" />
+    <Compile Include="Model\Shipments\CarriersForShipmentReqiest.cs" />
     <Compile Include="Model\Shipments\CarrierViewModel.cs" />
     <Compile Include="Model\Shipments\CarryTravelViewModel.cs" />
     <Compile Include="Model\Shipments\DeleteTravelRequest.cs" />

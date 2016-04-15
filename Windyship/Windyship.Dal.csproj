@@ -77,6 +77,18 @@
     <Compile Include="Migrations\201604130806592_reconfig.Designer.cs">
       <DependentUpon>201604130806592_reconfig.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201604150837171_CarryTravelRebild.cs" />
+    <Compile Include="Migrations\201604150837171_CarryTravelRebild.Designer.cs">
+      <DependentUpon>201604150837171_CarryTravelRebild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201604150859280_CarryTravelRebild1.cs" />
+    <Compile Include="Migrations\201604150859280_CarryTravelRebild1.Designer.cs">
+      <DependentUpon>201604150859280_CarryTravelRebild1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201604150905321_CarryTravelRebild2.cs" />
+    <Compile Include="Migrations\201604150905321_CarryTravelRebild2.Designer.cs">
+      <DependentUpon>201604150905321_CarryTravelRebild2.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Repositories\CarrierReviewRepository.cs" />
     <Compile Include="Repositories\CategoryRepository.cs" />
@@ -135,6 +147,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201604130806592_reconfig.resx">
       <DependentUpon>201604130806592_reconfig.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201604150837171_CarryTravelRebild.resx">
+      <DependentUpon>201604150837171_CarryTravelRebild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201604150859280_CarryTravelRebild1.resx">
+      <DependentUpon>201604150859280_CarryTravelRebild1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201604150905321_CarryTravelRebild2.resx">
+      <DependentUpon>201604150905321_CarryTravelRebild2.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

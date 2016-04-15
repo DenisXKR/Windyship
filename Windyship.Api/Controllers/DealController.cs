@@ -268,7 +268,7 @@ namespace Windyship.Api.Controllers
 
 			if (ModelState.IsValid)
 			{
-				var days = JsonConvert.SerializeObject(request.repeat_days);
+				//var days = JsonConvert.SerializeObject(request.repeat_days);
 
 				var carryTravel = new CarryTravel
 				{
@@ -276,17 +276,18 @@ namespace Windyship.Api.Controllers
 					ArrivalBefore = request.arrival_before,
 					MaxSize = request.max_size,
 					MaxWeight = request.max_weight,
-					RepeatDays = days,
+					RepeatDays = string.Join(",", request.repeat_days),
 					TravelingDate = request.traveling_date,
 				};
 
+				_carryTravelRepository.Add(carryTravel);
 				await _unitOfWork.SaveChangesAsync();
 
 				if (request.To != null)
 				{
 					foreach (var loc in request.To)
 					{
-						var locationTo = new TravelTo { Lat = loc.Lat, Long = loc.Long, TravelId = carryTravel.Id };
+						var locationTo = new TravelTo { Lat = loc.Lat, Long = loc.Long, CarryTraveId = carryTravel.Id };
 						_travelToRepository.Add(locationTo);
 					}
 				}
@@ -295,7 +296,7 @@ namespace Windyship.Api.Controllers
 				{
 					foreach (var loc in request.From)
 					{
-						var locationFrom = new TravelFrom { Lat = loc.Lat, Long = loc.Long, TravelId = carryTravel.Id };
+						var locationFrom = new TravelFrom { Lat = loc.Lat, Long = loc.Long, CarryTraveId = carryTravel.Id };
 						_travelFromRepository.Add(locationFrom);
 					}
 				}
@@ -336,24 +337,24 @@ namespace Windyship.Api.Controllers
 
 				_carryTravelRepository.Update(carryTravel);
 
-				_travelToRepository.RemoveRange(l => l.TravelId == carryTravel.Id);
+				_travelToRepository.RemoveRange(l => l.CarryTraveId == carryTravel.Id);
 
 				if (request.To != null)
 				{
 					foreach (var loc in request.To)
 					{
-						var locationTo = new TravelTo { Lat = loc.Lat, Long = loc.Long, TravelId = carryTravel.Id };
+						var locationTo = new TravelTo { Lat = loc.Lat, Long = loc.Long, CarryTraveId = carryTravel.Id };
 						_travelToRepository.Add(locationTo);
 					}
 				}
 
-				_travelFromRepository.RemoveRange(l => l.TravelId == carryTravel.Id);
+				_travelFromRepository.RemoveRange(l => l.CarryTraveId == carryTravel.Id);
 
 				if (request.From != null)
 				{
 					foreach (var loc in request.From)
 					{
-						var locationFrom = new TravelFrom { Lat = loc.Lat, Long = loc.Long, TravelId = carryTravel.Id };
+						var locationFrom = new TravelFrom { Lat = loc.Lat, Long = loc.Long, CarryTraveId = carryTravel.Id };
 						_travelFromRepository.Add(locationFrom);
 					}
 				}
@@ -388,8 +389,8 @@ namespace Windyship.Api.Controllers
 
 				if (shipment != null)
 				{
-					_travelFromRepository.RemoveRange(l => l.TravelId == request.travel_id);
-					_travelToRepository.RemoveRange(l => l.TravelId == request.travel_id);
+					_travelFromRepository.RemoveRange(l => l.CarryTraveId == request.travel_id);
+					_travelToRepository.RemoveRange(l => l.CarryTraveId == request.travel_id);
 					_disabledCategoriesRepository.RemoveRange(l => l.CarryTravelId == request.travel_id);
 					_carryTravelRepository.RemoveRange(s => s.Id == request.travel_id);
 
@@ -440,23 +441,25 @@ namespace Windyship.Api.Controllers
 		}
 
 		[Route("getCarriersForShipment"), HttpPost]
-		public async Task<IHttpActionResult> GetCarriersForShipment(int shipment_id)
+		public async Task<IHttpActionResult> GetCarriersForShipment(CarriersForShipmentReqiest request)
 		{
-			var shipment = await _shipmentRepository.GetFirstOrDefaultAsync(s => s.Id == shipment_id);
+			var shipment = await _shipmentRepository.GetFirstOrDefaultAsync(s => s.Id == request.Shipment_id);
 
 			if (shipment != null)
 			{
-				var travels = await _carryTravelRepository.GetAllAsync(t => t.TravelingDate > DateTime.Now);
+				var travels = await _carryTravelRepository.GetAllAsync(t => t.TravelingDate >= DateTime.Now);
 
 				var carriers = travels.Select(c => new CarrierViewModel
 				{
+					TravelId = c.Id,
 					CarrierId = c.UserId,
 					Delivery_date = c.ArrivalBefore,
-					From = new LocationViewModel
-					{
-						Lat = c.From.FirstOrDefault().Lat,
-						Long = c.From.FirstOrDefault().Long
-					},
+					From = c.From.FirstOrDefault() != null ?
+						new LocationViewModel
+						{
+							Lat = c.From.FirstOrDefault().Lat,
+							Long = c.From.FirstOrDefault().Long
+						} : null,
 					Image = string.Format("/image/avatar?id={0}", c.UserId),
 					Mobile = c.User.Phone,
 					Name = c.User.FirstName,
@@ -464,7 +467,6 @@ namespace Windyship.Api.Controllers
 				});
 
 				return ApiResult(true, carriers);
-
 			}
 			else return ApiResult(false);
 		}
@@ -606,7 +608,7 @@ namespace Windyship.Api.Controllers
 				}
 			}
 
-			var pagedShipment = shipments.OrderBy(s => s.Id).Skip((request.Page - 1) * 20).Take(20).ToList().Select(s => new ShipmentViewModel
+			var pagedShipment = shipments.OrderByDescending(s => s.PostDate).Skip((request.Page - 1) * 20).Take(20).ToList().Select(s => new ShipmentViewModel
 			{
 				budget = s.Budget,
 				category_id = s.CategoryId,
