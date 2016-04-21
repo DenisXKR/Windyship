@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Windyship.Api.Model.Account;
+using Windyship.Api.Model.Shipments;
 using Windyship.Api.Model.UserModels.Social;
 using Windyship.Api.Models.Api.v1.UserModels.Social;
 using Windyship.Api.Services.IdentitySvc;
@@ -25,8 +26,10 @@ namespace Windyship.Api.Controllers
 		private IWindyUserManager _userManager;
 		private IUserRepository _userRepository;
 		private IUnitOfWork _unitOfWork;
+		private IUserPhoneRepository _userPhoneRepository;
 
-		public AccountController(IWindySignInManager signInManager, IWindyUserManager userManager, IUserRepository userRepository, IUnitOfWork unitOfWork)
+		public AccountController(IWindySignInManager signInManager, IWindyUserManager userManager, IUserRepository userRepository,
+			IUnitOfWork unitOfWork, IUserPhoneRepository userPhoneRepository)
 		{
 			if (signInManager == null)
 			{
@@ -49,6 +52,7 @@ namespace Windyship.Api.Controllers
 			_userManager = userManager;
 			_userRepository = userRepository;
 			_unitOfWork = unitOfWork;
+			_userPhoneRepository = userPhoneRepository;
 		}
 
 		[Route("createAccount")]
@@ -125,7 +129,7 @@ namespace Windyship.Api.Controllers
 					email = user.Email,
 					user_name = user.FirstName,
 					mobile = user.Phone,
-					image = user.Avatar == null ? null : string.Format("/Image/Avatar?id={0}", user.Id),
+					image = user.Avatar == null ? null : string.Format("Image/Avatar?id={0}", user.Id),
 					access_token = user.TwitterId ?? user.FacebookId
 				});
 			}
@@ -158,8 +162,9 @@ namespace Windyship.Api.Controllers
 			}
 			else
 			{
+				/*
 				user.Email = request.Email;
-				user.FirstName = request.User_name;
+				user.FirstName = request.User_name;*/
 				user.TwitterId = request.Type == "twitter" ? request.Social_id : null;
 				user.FacebookId = request.Type == "facebook" ? request.Social_id : null;
 
@@ -298,7 +303,7 @@ namespace Windyship.Api.Controllers
 					email = user.Email,
 					user_name = user.FirstName,
 					mobile = user.UserName,
-					image = user.Avatar == null ? null : string.Format("/Image/Avatar?id={0}", user.Id),
+					image = user.Avatar == null ? null : string.Format("Image/Avatar?id={0}", user.Id),
 					access_token = user.Token
 				});
 			}
@@ -340,6 +345,41 @@ namespace Windyship.Api.Controllers
 			}
 
 			return ApiResult(true);
+		}
+
+		[Route("addNewMobile"), HttpPost]
+		public async Task<IHttpActionResult> AddNewMobile(UserMobileRequest request)
+		{
+			var id = User.Identity.GetUserId<int>();
+
+			var exisits = await _userPhoneRepository.GetFirstOrDefaultAsync(m => m.UserId == id && m.Phone == request.Mobile);
+
+			if (exisits != null) return ApiResult(false);
+
+			_userPhoneRepository.Add(new UserPhone { Phone = request.Mobile, UserId = id });
+			await _unitOfWork.SaveChangesAsync();
+
+			return ApiResult(true);
+		}
+
+		[Route("delMobile"), HttpPost]
+		public async Task<IHttpActionResult> DelMobile(UserMobileRequest request)
+		{
+			var id = User.Identity.GetUserId<int>();
+
+			_userPhoneRepository.RemoveRange(m => m.UserId == id && m.Phone == request.Mobile);
+			await _unitOfWork.SaveChangesAsync();
+
+			return ApiResult(true);
+		}
+
+		[Route("getMobiles"), HttpGet]
+		public async Task<IHttpActionResult> GetMobiles()
+		{
+			var id = User.Identity.GetUserId<int>();
+			var result = await _userPhoneRepository.GetAllAsync(m => m.UserId == id);
+
+			return ApiResult(true, result.Select(m => new { Mobile = m.Phone }));
 		}
 
 		#region System

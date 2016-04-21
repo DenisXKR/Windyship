@@ -227,6 +227,7 @@
     <Compile Include="Model\Shipments\SetReviewRequest.cs" />
     <Compile Include="Model\Shipments\ShipmentRequest.cs" />
     <Compile Include="Model\Shipments\ShipmentViewModel.cs" />
+    <Compile Include="Model\Account\UserMobileRequest.cs" />
     <Compile Include="Model\UserModels\AvatarUploadResponse.cs" />
     <Compile Include="Model\UserModels\AvatarUploadResponseCode.cs" />
     <Compile Include="Model\UserModels\BaseUserModel.cs" />

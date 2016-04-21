@@ -64,6 +64,7 @@
     <Compile Include="Entities\TravelTo.cs" />
     <Compile Include="Entities\LocationTo.cs" />
     <Compile Include="Entities\Shipment.cs" />
+    <Compile Include="Entities\UserPhone.cs" />
     <Compile Include="Entities\UserRequest.cs" />
     <Compile Include="Migrations\201604021634073_InitialCreate.cs" />
     <Compile Include="Migrations\201604021634073_InitialCreate.Designer.cs">
@@ -90,10 +91,12 @@
       <DependentUpon>201604150905321_CarryTravelRebild2.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Repositories\UserPhoneRepository.cs" />
     <Compile Include="Repositories\CarrierReviewRepository.cs" />
     <Compile Include="Repositories\CategoryRepository.cs" />
     <Compile Include="Repositories\ContentRepository.cs" />
     <Compile Include="Repositories\FaqRepository.cs" />
+    <Compile Include="Repositories\IUserPhoneRepository.cs" />
     <Compile Include="Repositories\ICarrierReviewRepository.cs" />
     <Compile Include="Repositories\ICategoryRepository.cs" />
     <Compile Include="Repositories\IDisabledCategoriesRepository.cs" />

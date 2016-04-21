@@ -93,7 +93,7 @@ namespace Windyship.Api.Controllers
 				{
 					foreach (var loc in request.To)
 					{
-						var locationTo = new LocationTo { Lat = loc.Lat, Long = loc.Long, ShipmentId = shipment.Id };
+						var locationTo = new LocationTo { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, Address = loc.Address, ShipmentId = shipment.Id };
 						_locationToRepository.Add(locationTo);
 					}
 				}
@@ -102,7 +102,7 @@ namespace Windyship.Api.Controllers
 				{
 					foreach (var loc in request.From)
 					{
-						var locationFrom = new LocationFrom { Lat = loc.Lat, Long = loc.Long, ShipmentId = shipment.Id };
+						var locationFrom = new LocationFrom { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, Address = loc.Address, ShipmentId = shipment.Id };
 						_locationFromRepository.Add(locationFrom);
 					}
 				}
@@ -149,7 +149,7 @@ namespace Windyship.Api.Controllers
 					{
 						foreach (var loc in request.To)
 						{
-							var locationTo = new LocationTo { Lat = loc.Lat, Long = loc.Long, ShipmentId = shipment.Id };
+							var locationTo = new LocationTo { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, Address = loc.Address, ShipmentId = shipment.Id };
 							_locationToRepository.Add(locationTo);
 						}
 					}
@@ -160,7 +160,7 @@ namespace Windyship.Api.Controllers
 					{
 						foreach (var loc in request.From)
 						{
-							var locationFrom = new LocationFrom { Lat = loc.Lat, Long = loc.Long, ShipmentId = shipment.Id };
+							var locationFrom = new LocationFrom { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, Address = loc.Address, ShipmentId = shipment.Id };
 							_locationFromRepository.Add(locationFrom);
 						}
 					}
@@ -287,7 +287,7 @@ namespace Windyship.Api.Controllers
 				{
 					foreach (var loc in request.To)
 					{
-						var locationTo = new TravelTo { Lat = loc.Lat, Long = loc.Long, CarryTraveId = carryTravel.Id };
+						var locationTo = new TravelTo { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, Address = loc.Address, CarryTraveId = carryTravel.Id };
 						_travelToRepository.Add(locationTo);
 					}
 				}
@@ -296,7 +296,7 @@ namespace Windyship.Api.Controllers
 				{
 					foreach (var loc in request.From)
 					{
-						var locationFrom = new TravelFrom { Lat = loc.Lat, Long = loc.Long, CarryTraveId = carryTravel.Id };
+						var locationFrom = new TravelFrom { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, Address = loc.Address, CarryTraveId = carryTravel.Id };
 						_travelFromRepository.Add(locationFrom);
 					}
 				}
@@ -343,7 +343,7 @@ namespace Windyship.Api.Controllers
 				{
 					foreach (var loc in request.To)
 					{
-						var locationTo = new TravelTo { Lat = loc.Lat, Long = loc.Long, CarryTraveId = carryTravel.Id };
+						var locationTo = new TravelTo { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, Address = loc.Address, CarryTraveId = carryTravel.Id };
 						_travelToRepository.Add(locationTo);
 					}
 				}
@@ -354,7 +354,7 @@ namespace Windyship.Api.Controllers
 				{
 					foreach (var loc in request.From)
 					{
-						var locationFrom = new TravelFrom { Lat = loc.Lat, Long = loc.Long, CarryTraveId = carryTravel.Id };
+						var locationFrom = new TravelFrom { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, Address = loc.Address, CarryTraveId = carryTravel.Id };
 						_travelFromRepository.Add(locationFrom);
 					}
 				}
@@ -458,12 +458,23 @@ namespace Windyship.Api.Controllers
 						new LocationViewModel
 						{
 							Lat = c.From.FirstOrDefault().Lat,
-							Long = c.From.FirstOrDefault().Long
+							Long = c.From.FirstOrDefault().Long,
+							Country = c.From.FirstOrDefault().Country,
+							Address = c.From.FirstOrDefault().Address
 						} : null,
-					Image = string.Format("/image/avatar?id={0}", c.UserId),
+					To = c.To.FirstOrDefault() != null ?
+						new LocationViewModel
+						{
+							Lat = c.To.FirstOrDefault().Lat,
+							Long = c.To.FirstOrDefault().Long,
+							Country = c.To.FirstOrDefault().Country,
+							Address = c.From.FirstOrDefault().Address
+						} : null,
+					Image = string.Format("image/avatar?id={0}", c.UserId),
 					Mobile = c.User.Phone,
 					Name = c.User.FirstName,
-					Rating = c.User.CarrierRating
+					Rating = c.User.CarrierRating,
+					CarrierRestrictions = c.DisabledCategories.Select(g => g.Category.GetName(request.Language)),
 				});
 
 				return ApiResult(true, carriers);
@@ -616,16 +627,16 @@ namespace Windyship.Api.Controllers
 				currency = s.Currency,
 				delevery_date = s.DeleveryDate,
 				description = s.Description,
-				from = s.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long }),
-				image1 = s.Image1 != null ? string.Format("/Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 1) : null,
-				image2 = s.Image2 != null ? string.Format("/Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 2) : null,
-				image3 = s.Image3 != null ? string.Format("/Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 3) : null,
+				from = s.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+				image1 = s.Image1 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 1) : null,
+				image2 = s.Image2 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 2) : null,
+				image3 = s.Image3 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 3) : null,
 				post_date = s.PostDate,
 				receiver = s.Carrier != null ? new SmallUserViewModel
 				{
 					id = s.Carrier.Id,
 					name = s.Carrier.FirstName,
-					image = s.Carrier.Avatar != null ? string.Format("/Image/Avatar?id={0}", s.Carrier.Id) : null,
+					image = s.Carrier.Avatar != null ? string.Format("Image/Avatar?id={0}", s.Carrier.Id) : null,
 				} : null,
 				recipiant_mobile = s.RecipiantMobile,
 				recipiant_name = s.RecipiantName,
@@ -635,13 +646,13 @@ namespace Windyship.Api.Controllers
 				{
 					id = s.User.Id,
 					name = s.User.FirstName,
-					image = s.User.Avatar != null ? string.Format("/Image/Avatar?id={0}", s.User.Id) : null,
+					image = s.User.Avatar != null ? string.Format("Image/Avatar?id={0}", s.User.Id) : null,
 				},
 				shipment_id = s.Id,
 				shipment_status = (int)s.ShipmentStatus,
 				size = s.Size,
 				title = s.Title,
-				to = s.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long }),
+				to = s.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
 				weight = s.Weight
 			});
 
