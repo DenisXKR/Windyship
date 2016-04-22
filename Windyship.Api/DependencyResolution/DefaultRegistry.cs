@@ -56,10 +56,13 @@ namespace Windyship.Api.DependencyResolution
 			For<IDataContext<TravelFrom, int>>().Use<DataContext<TravelFrom, int>>();
 			For<IDataContext<DisabledCategories, int>>().Use<DataContext<DisabledCategories, int>>();
 			For<IDataContext<UserPhone, int>>().Use<DataContext<UserPhone, int>>();
+			For<IDataContext<DeviceToken, int>>().Use<DataContext<DeviceToken, int>>();
 
 			For<IDataContext<CarryTravel, int>>().Use<DataContext<CarryTravel, int>>();
 			For<IDataContext<Shipment, int>>().Use<DataContext<Shipment, int>>();
 			For<IDataContext<CarrierReview, int>>().Use<DataContext<CarrierReview, int>>();
+			For<IDataContext<Notification, int>>().Use<DataContext<Notification, int>>();
+			For<IDataContext<InterestedShipment, int>>().Use<DataContext<InterestedShipment, int>>();
 
 			For<IUserRepository>().Use<UserRepository>();
 			For<IContentRepository>().Use<ContentRepository>();
@@ -73,6 +76,9 @@ namespace Windyship.Api.DependencyResolution
 			For<IDisabledCategoriesRepository>().Use<DisabledCategoriesRepository>();
 			For<ICarrierReviewRepository>().Use<CarrierReviewRepository>();
 			For<IUserPhoneRepository>().Use<UserPhoneRepository>();
+			For<INotificationRepository>().Use<NotificationRepository>();
+			For<IDeviceTokenRepository>().Use<DeviceTokenRepository>();
+			For<IInterestedShipmentRepository>().Use<InterestedShipmentRepository>();
 
 			For<IShipmentRepository>().Use<ShipmentRepository>();
 			For<ICarryTravelRepository>().Use<CarryTravelRepository>();

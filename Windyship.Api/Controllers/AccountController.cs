@@ -27,9 +27,10 @@ namespace Windyship.Api.Controllers
 		private IUserRepository _userRepository;
 		private IUnitOfWork _unitOfWork;
 		private IUserPhoneRepository _userPhoneRepository;
+		private IDeviceTokenRepository _deviceTokenRepository;
 
 		public AccountController(IWindySignInManager signInManager, IWindyUserManager userManager, IUserRepository userRepository,
-			IUnitOfWork unitOfWork, IUserPhoneRepository userPhoneRepository)
+			IUnitOfWork unitOfWork, IUserPhoneRepository userPhoneRepository, IDeviceTokenRepository deviceTokenRepository)
 		{
 			if (signInManager == null)
 			{
@@ -53,6 +54,7 @@ namespace Windyship.Api.Controllers
 			_userRepository = userRepository;
 			_unitOfWork = unitOfWork;
 			_userPhoneRepository = userPhoneRepository;
+			_deviceTokenRepository = deviceTokenRepository;
 		}
 
 		[Route("createAccount")]
@@ -158,18 +160,20 @@ namespace Windyship.Api.Controllers
 				};
 
 				var idResult = await _userManager.CreateAsync(user, "*");
-				if (!idResult.Succeeded) return ApiResult(false, idResult.Errors);
+				if (!idResult.Succeeded)
+				{
+					return ApiResult(false, idResult.Errors);
+				}
 			}
 			else
 			{
 				/*
 				user.Email = request.Email;
 				user.FirstName = request.User_name;*/
-				user.TwitterId = request.Type == "twitter" ? request.Social_id : null;
-				user.FacebookId = request.Type == "facebook" ? request.Social_id : null;
+				user.TwitterId = request.Type == "twitter" ? request.Social_id : user.TwitterId;
+				user.FacebookId = request.Type == "facebook" ? request.Social_id : user.FacebookId;
 
 				await _userManager.UpdateUser(user);
-				return ApiResult(true);
 			}
 
 			await _userManager.SendCheckPhoneCode(request.Mobile);
@@ -373,13 +377,39 @@ namespace Windyship.Api.Controllers
 			return ApiResult(true);
 		}
 
-		[Route("getMobiles"), HttpGet]
+		[Route("getMobile"), HttpGet]
 		public async Task<IHttpActionResult> GetMobiles()
 		{
 			var id = User.Identity.GetUserId<int>();
 			var result = await _userPhoneRepository.GetAllAsync(m => m.UserId == id);
 
 			return ApiResult(true, result.Select(m => new { Mobile = m.Phone }));
+		}
+
+		[Route("addToken"), HttpPost]
+		public async Task<IHttpActionResult> AddToken(AddTokenRequest request)
+		{
+			var id = User.Identity.GetUserId<int>();
+
+			var result = await _deviceTokenRepository.GetFirstOrDefaultAsync(t => t.UserId == id && (int)t.DeviceType == request.device_type &&
+				t.Token == request.device_token);
+
+			if (result == null)
+			{
+				var dt = new DeviceToken
+				{
+					DeviceType = (DeviceType)request.device_type,
+					UserId = id,
+					Token = request.device_token
+				};
+
+				_deviceTokenRepository.Add(dt);
+				await _unitOfWork.SaveChangesAsync();
+
+				return ApiResult(true);
+			}
+
+			return ApiResult(false);
 		}
 
 		#region System

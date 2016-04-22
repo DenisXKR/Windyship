@@ -55,9 +55,13 @@
     <Compile Include="Entities\Category.cs" />
     <Compile Include="Entities\Content.cs" />
     <Compile Include="Entities\ContentPart.cs" />
+    <Compile Include="Entities\DeviceToken.cs" />
+    <Compile Include="Entities\DeviceType.cs" />
     <Compile Include="Entities\DisabledCategories.cs" />
     <Compile Include="Entities\Faq.cs" />
+    <Compile Include="Entities\InterestedShipment.cs" />
     <Compile Include="Entities\Language.cs" />
+    <Compile Include="Entities\Notification.cs" />
     <Compile Include="Entities\ShipmentStatus.cs" />
     <Compile Include="Entities\TravelFrom.cs" />
     <Compile Include="Entities\LocationFrom.cs" />
@@ -91,6 +95,12 @@
       <DependentUpon>201604150905321_CarryTravelRebild2.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Repositories\InterestedShipmentRepository.cs" />
+    <Compile Include="Repositories\DeviceTokenRepository.cs" />
+    <Compile Include="Repositories\IInterestedShipmentRepository.cs" />
+    <Compile Include="Repositories\IDeviceTokenRepository.cs" />
+    <Compile Include="Repositories\NotificationRepository.cs" />
+    <Compile Include="Repositories\INotificationRepository.cs" />
     <Compile Include="Repositories\UserPhoneRepository.cs" />
     <Compile Include="Repositories\CarrierReviewRepository.cs" />
     <Compile Include="Repositories\CategoryRepository.cs" />

@@ -58,5 +58,7 @@ namespace Windyship.Entities
 		public virtual ICollection<LocationFrom> From { get; set; }  // location
 
 		public virtual ICollection<LocationTo> To { get; set; }
+
+		public virtual ICollection<CarrierReview> CarrierReview { get; set; }
 	}
 }

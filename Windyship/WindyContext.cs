@@ -24,6 +24,10 @@ namespace Windyship.Dal
 		public DbSet<TravelTo> TravelTo { get; set; }
 		public DbSet<CarryTravel> CarryTravel { get; set; }
 		public DbSet<CarrierReview> CarrierReview { get; set; }
+		public DbSet<UserPhone> UserPhone { get; set; }
+		public DbSet<Notification> Notification { get; set; }
+		public DbSet<DeviceToken> DeviceToken { get; set; }
+		public DbSet<InterestedShipment> InterestedShipment { get; set; }
 
 		protected override void OnModelCreating(DbModelBuilder modelBuilder)
 		{

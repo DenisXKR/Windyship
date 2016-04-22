@@ -60,7 +60,7 @@ namespace Windyship.Api.Services.IdentitySvc
 				return IdentityResult.Failed("Error_UserNotFound");
 			}
 
-			if (string.Compare(user.PhoneCode, token) == 0)
+			if (token != null && string.Compare(user.PhoneCode, token) == 0)
 			{
 				user.PhoneCode = null;
 				user.PhoneChecked = true;

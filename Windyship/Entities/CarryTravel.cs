@@ -9,6 +9,8 @@ namespace Windyship.Entities
 
 		public int UserId { get; set; }
 
+		public bool Active { get; set; }
+
 		public DateTime TravelingDate { get; set; }
 
 		public DateTime ArrivalBefore { get; set; }
