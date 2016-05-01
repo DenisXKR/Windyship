@@ -27,6 +27,8 @@ namespace Windyship.Api.Model.Shipments
 
 		public IEnumerable<string> CarrierRestrictions {get; set;}
 
+		public double Distance { get; set; }
+
 		/*
 		public string Currency {get ;set;}
 

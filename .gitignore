@@ -45,3 +45,6 @@ Windyship/obj/Release/Windyship.Dal.csproj.FileListAbsolute.txt
 Windyship/obj/Release/Windyship.Dal.csprojResolveAssemblyReference.cache
 Windyship/obj/Release/Windyship.dll
 Windyship/obj/Release/Windyship.pdb
+Windyship.Api/obj/Release/Package/PackageTmp/bin/Windyship.Api.dll
+Windyship.Api/obj/Release/Windyship.Api.dll
+Windyship.Api/obj/Release/Windyship.Api.pdb

@@ -21,6 +21,8 @@ namespace Windyship.Api.Model.Shipments
 
 		public IEnumerable<LocationViewModel> to { get; set; }
 
+		public bool isInterestActive { get; set; }
+
 		public int category_id { get; set; }
 
 		public int rate { get; set; }

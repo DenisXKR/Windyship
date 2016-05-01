@@ -1,13 +1,16 @@
 ﻿using Microsoft.AspNet.Identity;
 using Newtonsoft.Json;
 using System;
+using System.Data.Entity.Spatial;
 using System.Device.Location;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Windyship.Api.Model.Common;
 using Windyship.Api.Model.Shipments;
+using Windyship.Api.Services;
 using Windyship.Api.Services.IdentitySvc;
 using Windyship.Core;
 using Windyship.Entities;
@@ -33,13 +36,15 @@ namespace Windyship.Api.Controllers
 		private readonly ICarrierReviewRepository _carrierReviewRepository;
 		private readonly INotificationRepository _notificationRepository;
 
+		private readonly INotificationService _notificationService;
+
 		private IUnitOfWork _unitOfWork;
 
 		public DealController(IUserRepository userRepository, ICategoryRepository categoryRepository, IShipmentRepository shipmentRepository,
 			ILocationFromRepository locationFromRepository, ILocationToRepository locationToRepository, ITravelFromRepository travelFromRepository,
 			ITravelToRepository travelToRepository, IDisabledCategoriesRepository disabledCategoriesRepository, ICarrierReviewRepository carrierReviewRepository,
 			ICarryTravelRepository carryTravelRepository, INotificationRepository notificationRepository, IInterestedShipmentRepository interestedShipmentRepository,
-			IUnitOfWork unitOfWork)
+			INotificationService notificationService, IUnitOfWork unitOfWork)
 		{
 			_userRepository = userRepository;
 			_categoryRepository = categoryRepository;
@@ -53,6 +58,7 @@ namespace Windyship.Api.Controllers
 			_carrierReviewRepository = carrierReviewRepository;
 			_notificationRepository = notificationRepository;
 			_interestedShipmentRepository = interestedShipmentRepository;
+			_notificationService = notificationService;
 
 			_unitOfWork = unitOfWork;
 		}
@@ -191,8 +197,10 @@ namespace Windyship.Api.Controllers
 				{
 					_locationToRepository.RemoveRange(l => l.ShipmentId == request.Shipment_id);
 					_locationFromRepository.RemoveRange(l => l.ShipmentId == request.Shipment_id);
-					_shipmentRepository.RemoveRange(s => s.Id == request.Shipment_id);
+					_interestedShipmentRepository.RemoveRange(i => i.ShipmentId == request.Shipment_id);
+					await _unitOfWork.SaveChangesAsync();
 
+					_shipmentRepository.RemoveRange(s => s.Id == request.Shipment_id);
 					await _unitOfWork.SaveChangesAsync();
 
 					return ApiResult(true);
@@ -267,7 +275,7 @@ namespace Windyship.Api.Controllers
 		}
 
 		[Route("addCarryTravel"), HttpPost]
-		public async Task<IHttpActionResult> AddCarryTravel([FromBody] CarryTravelViewModel request)
+		public async Task<IHttpActionResult> AddCarryTravel([FromBody] CarryTravelRequest request)
 		{
 			var id = User.Identity.GetUserId<int>();
 
@@ -281,7 +289,7 @@ namespace Windyship.Api.Controllers
 					ArrivalBefore = request.arrival_before,
 					MaxSize = request.max_size,
 					MaxWeight = request.max_weight,
-					RepeatDays = string.Join(",", request.repeat_days),
+					RepeatDays = request.repeat_days != null ? string.Join(",", request.repeat_days) : null,
 					TravelingDate = request.traveling_date,
 					Active = true
 				};
@@ -325,7 +333,7 @@ namespace Windyship.Api.Controllers
 		}
 
 		[Route("editCarryTravel"), HttpPost]
-		public async Task<IHttpActionResult> EditCarryTravel([FromBody] CarryTravelViewModel request)
+		public async Task<IHttpActionResult> EditCarryTravel([FromBody] CarryTravelRequest request)
 		{
 			var id = User.Identity.GetUserId<int>();
 
@@ -333,12 +341,11 @@ namespace Windyship.Api.Controllers
 
 			if (carryTravel != null)
 			{
-				var days = JsonConvert.SerializeObject(request.repeat_days);
-
+				carryTravel.Active = true;
 				carryTravel.ArrivalBefore = request.arrival_before;
 				carryTravel.MaxSize = request.max_size;
 				carryTravel.MaxWeight = request.max_weight;
-				carryTravel.RepeatDays = days;
+				carryTravel.RepeatDays = request.repeat_days != null ? string.Join(",", request.repeat_days) : null;
 				carryTravel.TravelingDate = request.traveling_date;
 
 				_carryTravelRepository.Update(carryTravel);
@@ -418,7 +425,7 @@ namespace Windyship.Api.Controllers
 		{
 			var id = User.Identity.GetUserId<int>();
 			var shipment = await _shipmentRepository.GetFirstOrDefaultAsync(s => s.Id == request.Shipment_id &&
-				s.UserId == id && s.ShipmentStatus == ShipmentStatus.DeliveredToReceipt);
+				s.UserId == id && (s.ShipmentStatus == ShipmentStatus.DeliveredToReceipt || s.ShipmentStatus == ShipmentStatus.NotDelivered));
 
 			var user = _userRepository.GetById(id);
 
@@ -436,8 +443,10 @@ namespace Windyship.Api.Controllers
 				_carrierReviewRepository.Add(review);
 				await _unitOfWork.SaveChangesAsync();
 
-				var rate = _carrierReviewRepository.GetQuery(u => u.Shipment.CarrierId == shipment.CarrierId).Average(r => (decimal)r.Rate);
-				user.CarrierRating = rate;
+				await _notificationService.SendNotice(id, shipment.CarrierId.Value, shipment, 6);
+
+				var rate = _carrierReviewRepository.GetQuery(u => u.Shipment.CarrierId == shipment.CarrierId).Average(r => (decimal?)r.Rate);
+				user.CarrierRating = rate ?? 0;
 				await _unitOfWork.SaveChangesAsync();
 
 				return ApiResult(true);
@@ -449,43 +458,107 @@ namespace Windyship.Api.Controllers
 		[Route("getCarriersForShipment"), HttpPost]
 		public async Task<IHttpActionResult> GetCarriersForShipment(CarriersForShipmentReqiest request)
 		{
-			var shipment = await _shipmentRepository.GetFirstOrDefaultAsync(s => s.Id == request.Shipment_id);
+			var id = User.Identity.GetUserId<int>();
+			var shipment = await _shipmentRepository.GetFirstOrDefaultAsync(s => s.Id == request.Shipment_id && s.UserId == id);
 
 			if (shipment != null)
 			{
-				var travels = await _carryTravelRepository.GetAllAsync(t => t.TravelingDate >= DateTime.Now && t.Active);
+				var fromShipment = shipment.From.FirstOrDefault();
+				var toShipment = shipment.To.FirstOrDefault();
+
+				var @from = DbGeography.FromText( String.Format( CultureInfo.InvariantCulture.NumberFormat, "POINT({0} {1})", fromShipment.Long, fromShipment.Lat ), 4326 );
+				var @to = DbGeography.FromText( String.Format( CultureInfo.InvariantCulture.NumberFormat, "POINT({0} {1})", toShipment.Long, toShipment.Lat ), 4326 );
+
+				var fromPoints = _travelFromRepository.GetQuery(t => t.CarryTravel.UserId != id && t.CarryTravel.Active &&
+					t.CarryTravel.TravelingDate >= DateTime.Now && t.Country == fromShipment.Country);
+
+				var toPoints = _travelToRepository.GetQuery(t => t.CarryTravel.UserId != id && t.CarryTravel.Active &&
+					t.CarryTravel.TravelingDate >= DateTime.Now && t.Country == toShipment.Country);
+
+				var distance = from f in fromPoints
+							   join t in toPoints on f.CarryTraveId equals t.CarryTraveId
+							   select new
+							   {
+								   Id = f.CarryTraveId,
+								   TravelFrom = f.CarryTravel,
+								   FromPoint = f,
+								   ToPoin = t,
+								   Distanse = @from.Distance(DbGeography.FromText("POINT(" + t.Long.ToString() + " " + t.Lat.ToString() + ")", 4326)) +
+											  @to.Distance(DbGeography.FromText("POINT(" + t.Long.ToString() + " " + t.Lat.ToString() + ")", 4326))
+							   };
+
+				var travels = distance.ToList();
 
 				var carriers = travels.Select(c => new CarrierViewModel
 				{
-					TravelId = c.Id,
-					CarrierId = c.UserId,
-					Delivery_date = c.ArrivalBefore,
-					From = c.From.FirstOrDefault() != null ?
+					TravelId = c.TravelFrom.Id,
+					CarrierId = c.TravelFrom.UserId,
+					Delivery_date = c.TravelFrom.ArrivalBefore,
+					From = c.FromPoint != null ?
 						new LocationViewModel
 						{
-							Lat = c.From.FirstOrDefault().Lat,
-							Long = c.From.FirstOrDefault().Long,
-							Country = c.From.FirstOrDefault().Country,
-							Address = c.From.FirstOrDefault().Address
+							Lat = c.FromPoint.Lat,
+							Long = c.FromPoint.Long,
+							Country = c.FromPoint.Country,
+							Address = c.FromPoint.Address
 						} : null,
-					To = c.To.FirstOrDefault() != null ?
+					To = c.ToPoin != null ?
 						new LocationViewModel
 						{
-							Lat = c.To.FirstOrDefault().Lat,
-							Long = c.To.FirstOrDefault().Long,
-							Country = c.To.FirstOrDefault().Country,
-							Address = c.From.FirstOrDefault().Address
+							Lat = c.ToPoin.Lat,
+							Long = c.ToPoin.Long,
+							Country = c.ToPoin.Country,
+							Address = c.ToPoin.Address
 						} : null,
-					Image = string.Format("image/avatar?id={0}", c.UserId),
-					Mobile = c.User.Phone,
-					Name = c.User.FirstName,
-					Rating = c.User.CarrierRating,
-					CarrierRestrictions = c.DisabledCategories.Select(g => g.Category.GetName(request.Language)),
-				});
+					Image = string.Format("image/avatar?id={0}", c.TravelFrom.UserId),
+					Mobile = c.TravelFrom.User.Phone,
+					Name = c.TravelFrom.User.FirstName,
+					Rating = c.TravelFrom.User.CarrierRating,
+					CarrierRestrictions = c.TravelFrom.DisabledCategories.Select(g => g.Category.GetName(request.Language)),
+					Distance = c.Distanse.Value
+				}).OrderBy(c => c.Distance);
 
 				return ApiResult(true, carriers);
 			}
 			else return ApiResult(false);
+		}
+
+		[Route("getTravels"), HttpPost]
+		public async Task<IHttpActionResult> GetTravels(GetTravelsRequest request)
+		{
+			var id = User.Identity.GetUserId<int>();
+			var now = DateTime.Now.Date;
+
+			var travels = await _carryTravelRepository.GetAllAsync(t => t.UserId == id);
+			var pagedTrevels = travels.OrderBy(t => t.TravelingDate).Skip((request.Page - 1) * 20).Take(20).ToList();
+
+			var result = pagedTrevels.Select(t => new CarryTravelViewModel
+			{
+				Id = t.Id,
+				arrival_before = t.ArrivalBefore,
+				repeat_days = t.RepeatDays != null ? t.RepeatDays.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries) : null,
+				not_allowed_categories = t.DisabledCategories.Select(c => c.CategoryId),
+				not_allowed_categories_str = t.DisabledCategories.Select(c => c.Category.GetName(request.language)),
+				From = t.From.Select(l => new TravelFrom { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+				To = t.To.Select(l => new TravelFrom { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+				max_size = t.MaxSize,
+				max_weight = t.MaxWeight,
+				traveling_date = t.TravelingDate,
+				Carrier = new SmallUserViewModel
+				{
+					id = t.UserId,
+					name = t.User.FirstName,
+					image = t.User.Avatar != null ? string.Format("Image/Avatar?id={0}", t.UserId) : null,
+				}
+			});
+
+			return Ok(new
+			{
+				status = true,
+				pages_count = Math.Ceiling((float)travels.Count() / 20),
+				page = request.Page,
+				items = result
+			});
 		}
 
 		[Route("hireCarrier"), HttpPost]
@@ -493,15 +566,49 @@ namespace Windyship.Api.Controllers
 		{
 			var id = User.Identity.GetUserId<int>();
 			var shipment = await _shipmentRepository.GetFirstOrDefaultAsync(s => s.Id == request.Shipment_id &&
-				s.UserId == id && s.ShipmentStatus == ShipmentStatus.PostShipmentRequest);
+				s.UserId == id && (s.ShipmentStatus == ShipmentStatus.PostShipmentRequest));
 
 			if (shipment != null)
 			{
 				shipment.CarrierId = request.Carrier_id;
 				shipment.ShipmentStatus = ShipmentStatus.HireCarrier;
 
-				_notificationRepository.Add(new Notification(shipment));
+				await _notificationService.SendNotice(shipment.UserId, shipment.CarrierId.Value, shipment, 1);
 
+				await _unitOfWork.SaveChangesAsync();
+
+				return ApiResult(true);
+			}
+
+			return ApiResult(false);
+		}
+
+		[Route("rejectHire"), HttpPost]
+		public async Task<IHttpActionResult> RejectHire(RejectHireRequest request)
+		{
+			var id = User.Identity.GetUserId<int>();
+
+			var shipment = await _shipmentRepository.GetFirstOrDefaultAsync(s => s.Id == request.Shipment_id &&
+				s.UserId == id && s.ShipmentStatus == ShipmentStatus.HireCarrier);
+
+			if (shipment != null)
+			{
+				await _notificationService.SendNotice(shipment.UserId, shipment.CarrierId.Value, shipment, 11);
+				shipment.CarrierId = null;
+				shipment.ShipmentStatus = ShipmentStatus.PostShipmentRequest;
+				await _unitOfWork.SaveChangesAsync();
+
+				return ApiResult(true);
+			}
+
+			shipment = await _shipmentRepository.GetFirstOrDefaultAsync(s => s.Id == request.Shipment_id &&
+				s.CarrierId == id && s.ShipmentStatus == ShipmentStatus.HireCarrier);
+
+			if (shipment != null)
+			{
+				await _notificationService.SendNotice(shipment.CarrierId.Value, shipment.UserId, shipment, 11);
+				shipment.CarrierId = null;
+				shipment.ShipmentStatus = ShipmentStatus.PostShipmentRequest;
 				await _unitOfWork.SaveChangesAsync();
 
 				return ApiResult(true);
@@ -514,7 +621,10 @@ namespace Windyship.Api.Controllers
 		public async Task<IHttpActionResult> Interest(InterestRequest request)
 		{
 			var id = User.Identity.GetUserId<int>();
-			var shipmentIn = await _interestedShipmentRepository.GetFirstOrDefaultAsync(s => s.Id == request.shipment_id && s.UserId == id);
+
+			if (!_carryTravelRepository.Any(c => c.UserId == id && c.Active)) return ApiResult(false);
+
+			var shipmentIn = await _interestedShipmentRepository.GetFirstOrDefaultAsync(s => s.ShipmentId == request.shipment_id && s.UserId == id);
 
 			if (shipmentIn != null)
 			{
@@ -525,23 +635,25 @@ namespace Windyship.Api.Controllers
 					return ApiResult(true);
 				}
 
-				var shipment = await _shipmentRepository.GetFirstOrDefaultAsync(s => s.Id == request.shipment_id);
+				return ApiResult(false);
+			}
 
-				if (shipment != null)
+			var shipment = await _shipmentRepository.GetFirstOrDefaultAsync(s => s.Id == request.shipment_id && s.UserId != id &&
+				s.ShipmentStatus == ShipmentStatus.PostShipmentRequest);
+
+			if (shipment != null)
+			{
+				var inShip = new InterestedShipment
 				{
+					ShipmentId = request.shipment_id,
+					UserId = id
+				};
 
-					var inShip = new InterestedShipment
-					{
-						ShipmentId = request.shipment_id,
-						UserId = id
-					};
+				_interestedShipmentRepository.Add(inShip);
+				await _notificationService.SendNotice(id, shipment.UserId, shipment, 7);
 
-					_interestedShipmentRepository.Add(inShip);
-					_notificationRepository.Add(new Notification(shipment));
-					
-					await _unitOfWork.SaveChangesAsync();
-					return ApiResult(true);
-				}
+				await _unitOfWork.SaveChangesAsync();
+				return ApiResult(true);
 			}
 
 			return ApiResult(false);
@@ -552,7 +664,7 @@ namespace Windyship.Api.Controllers
 		{
 			var id = User.Identity.GetUserId<int>();
 			var shipment = await _shipmentRepository.GetFirstOrDefaultAsync(s => s.Id == request.Shipment_id &&
-				s.CarrierId == id && s.ShipmentStatus == ShipmentStatus.PostShipmentRequest);
+				s.CarrierId == id && s.ShipmentStatus == ShipmentStatus.HireCarrier);
 
 			if (shipment != null)
 			{
@@ -562,7 +674,7 @@ namespace Windyship.Api.Controllers
 
 				shipment.ShipmentStatus = ShipmentStatus.AcceptShipmentRequest;
 
-				_notificationRepository.Add(new Notification(shipment));
+				await _notificationService.SendNotice(id, shipment.UserId, shipment, 2);
 
 				await _unitOfWork.SaveChangesAsync();
 
@@ -582,7 +694,9 @@ namespace Windyship.Api.Controllers
 			if (shipment != null)
 			{
 				shipment.ShipmentStatus = ShipmentStatus.DeliveredToCarrier;
-				_notificationRepository.Add(new Notification(shipment));
+
+				await _notificationService.SendNotice(id, shipment.CarrierId.Value, shipment, 4);
+
 				await _unitOfWork.SaveChangesAsync();
 
 				return ApiResult(true);
@@ -602,7 +716,7 @@ namespace Windyship.Api.Controllers
 			{
 				shipment.ShipmentStatus = ShipmentStatus.DeliveredToReceipt;
 				shipment.DeleveryDate = DateTime.Now;
-				_notificationRepository.Add(new Notification(shipment));
+				await _notificationService.SendNotice(id, shipment.CarrierId.Value, shipment, 5);
 				await _unitOfWork.SaveChangesAsync();
 
 				return ApiResult(true);
@@ -615,7 +729,7 @@ namespace Windyship.Api.Controllers
 			{
 				shipment.ShipmentStatus = ShipmentStatus.DeliveredToReceipt;
 				shipment.DeleveryDate = DateTime.Now;
-				_notificationRepository.Add(new Notification(shipment));
+				await _notificationService.SendNotice(shipment.UserId, id, shipment, 5);
 				await _unitOfWork.SaveChangesAsync();
 
 				return ApiResult(true);
@@ -637,17 +751,18 @@ namespace Windyship.Api.Controllers
 				{
 					case "interested":
 						var interested = _interestedShipmentRepository.All().Where(i => i.UserId == id).Select(si => si.ShipmentId).ToList();
-						shipments = _shipmentRepository.GetQuery(s => interested.Contains(s.Id));
+						shipments = _shipmentRepository.GetQuery(s => s.ShipmentStatus != ShipmentStatus.Cancelled && interested.Contains(s.Id));
 						break;
 
 					case "in-progress":
 						shipments = _shipmentRepository.GetQuery(s => s.CarrierId == id &&
 							(s.ShipmentStatus == ShipmentStatus.AcceptShipmentRequest || s.ShipmentStatus == ShipmentStatus.DeliveredToCarrier ||
-							 s.ShipmentStatus == ShipmentStatus.DeliveredToReceipt));
+							 s.ShipmentStatus == ShipmentStatus.DeliveredToReceipt || s.ShipmentStatus == ShipmentStatus.HireCarrier));
 						break;
 
 					case "history":
-						shipments = _shipmentRepository.GetQuery(s => s.CarrierId == id && s.ShipmentStatus == ShipmentStatus.Review);
+						shipments = _shipmentRepository.GetQuery(s => s.CarrierId == id && (s.ShipmentStatus == ShipmentStatus.Review ||
+							s.ShipmentStatus == ShipmentStatus.NotDelivered));
 						break;
 				}
 			}
@@ -667,7 +782,8 @@ namespace Windyship.Api.Controllers
 						break;
 
 					case "history":
-						shipments = _shipmentRepository.GetQuery(s => s.UserId == id && s.ShipmentStatus == ShipmentStatus.Review);
+						shipments = _shipmentRepository.GetQuery(s => s.UserId == id && (s.ShipmentStatus == ShipmentStatus.Review ||
+							s.ShipmentStatus == ShipmentStatus.Cancelled || s.ShipmentStatus == ShipmentStatus.NotDelivered));
 						break;
 				}
 			}
@@ -694,6 +810,13 @@ namespace Windyship.Api.Controllers
 					id = s.User.Id,
 					name = s.User.FirstName,
 					image = s.User.Avatar != null ? string.Format("Image/Avatar?id={0}", s.User.Id) : null,
+				},
+				carrier = s.CarrierId == null ? null : new SmallUserViewModel
+				{
+					id = s.CarrierId.Value,
+					name = s.Carrier.FirstName,
+					image = s.Carrier.Avatar != null ? string.Format("Image/Avatar?id={0}", s.Carrier.Id) : null,
+					mobile = s.Carrier.Phone
 				},
 				shipment_id = s.Id,
 				shipment_status = (int)s.ShipmentStatus,
@@ -732,7 +855,8 @@ namespace Windyship.Api.Controllers
 		[Route("waitingList"), HttpPost]
 		public IHttpActionResult WaitingList(GetShipmentsRequest request)
 		{
-			var shipments = _shipmentRepository.GetQuery(s => s.ShipmentStatus == ShipmentStatus.PostShipmentRequest);
+			var id = User.Identity.GetUserId<int>();
+			var shipments = _shipmentRepository.GetQuery(s => s.ShipmentStatus == ShipmentStatus.PostShipmentRequest && s.UserId != id);
 
 			var pagedShipment = shipments.OrderByDescending(s => s.PostDate).Skip((request.Page - 1) * 20).Take(20).ToList().Select(s => new ShipmentViewModel
 			{
@@ -742,6 +866,7 @@ namespace Windyship.Api.Controllers
 				currency = s.Currency,
 				delevery_date = s.DeleveryDate,
 				description = s.Description,
+				interested = _interestedShipmentRepository.GetQuery(i => i.ShipmentId == s.Id && i.UserId == id).FirstOrDefault() != null,
 				from = s.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
 				image1 = s.Image1 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 1) : null,
 				image2 = s.Image2 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 2) : null,
@@ -753,13 +878,28 @@ namespace Windyship.Api.Controllers
 					name = s.User.FirstName,
 					image = s.User.Avatar != null ? string.Format("Image/Avatar?id={0}", s.User.Id) : null,
 				},
+				carrier = s.CarrierId == null ? null : new SmallUserViewModel
+				{
+					id = s.CarrierId.Value,
+					name = s.Carrier.FirstName,
+					image = s.Carrier.Avatar != null ? string.Format("Image/Avatar?id={0}", s.Carrier.Id) : null,
+				},
 				shipment_id = s.Id,
 				shipment_status = (int)s.ShipmentStatus,
 				size = s.Size,
 				title = s.Title,
 				to = s.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
 				weight = s.Weight
-			});
+			}).ToList();
+
+			foreach (var shipment in pagedShipment)
+			{
+				var fromCountry = shipment.from.FirstOrDefault().Country;
+				var toCountry = shipment.to.FirstOrDefault().Country;
+
+				shipment.isInterestActive = _carryTravelRepository.Any(t => t.TravelingDate >= DateTime.Now && t.Active && t.UserId == id &&
+					t.From.Any(f => f.Country == fromCountry) && t.To.Any(p => p.Country == toCountry));
+			}
 
 			return Ok(new
 			{
@@ -771,7 +911,7 @@ namespace Windyship.Api.Controllers
 		}
 
 		[Route("getProfile"), HttpPost]
-		public IHttpActionResult GetProfile(GetShipmentsRequest request)
+		public async Task<IHttpActionResult> GetProfile(GetShipmentsRequest request)
 		{
 			var id = User.Identity.GetUserId<int>();
 			var user = _userRepository.GetById(id);
@@ -783,12 +923,12 @@ namespace Windyship.Api.Controllers
 			{
 				budget = s.Budget,
 				category_id = s.CategoryId,
-				category = s.Category.GetName(request.language),
+				category = s.Category.GetName(request == null ? "en" : request.language),
 				currency = s.Currency,
 				delevery_date = s.DeleveryDate,
 				description = s.Description,
-				rate = s.CarrierReview.FirstOrDefault().Rate,
-				comment = s.CarrierReview.FirstOrDefault().Comment,
+				rate = s.CarrierReview.FirstOrDefault() != null ? s.CarrierReview.FirstOrDefault().Rate : 0,
+				comment = s.CarrierReview.FirstOrDefault() != null ? s.CarrierReview.FirstOrDefault().Comment : null,
 				from = s.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
 				image1 = s.Image1 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 1) : null,
 				image2 = s.Image2 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 2) : null,
@@ -808,10 +948,13 @@ namespace Windyship.Api.Controllers
 				weight = s.Weight
 			});
 
+			var travelActive = await _carryTravelRepository.GetFirstOrDefaultAsync(c => c.UserId == user.Id);
+
 			return ApiResult(true, new
 			{
 				name = user.FirstName,
 				mobile = user.Phone,
+				isTravelActive = travelActive == null ? true : travelActive.Active,
 				rating = user.CarrierRating,
 				image = user.Avatar != null ? string.Format("Image/Avatar?id={0}", user.Id) : null,
 				history = history
@@ -822,6 +965,8 @@ namespace Windyship.Api.Controllers
 		public IHttpActionResult GetCarrierProfile(GetUserRequest request)
 		{
 			var user = _userRepository.GetById(request.User_id);
+
+			if (user == null) return ApiResult(false, "User not found");
 
 			var shipments = _shipmentRepository.GetQuery(s => s.CarrierId == user.Id &&
 				(s.ShipmentStatus == ShipmentStatus.PostShipmentRequest || s.ShipmentStatus == ShipmentStatus.Review)).ToList();
@@ -834,8 +979,8 @@ namespace Windyship.Api.Controllers
 				currency = s.Currency,
 				delevery_date = s.DeleveryDate,
 				description = s.Description,
-				rate = s.CarrierReview.FirstOrDefault().Rate,
-				comment = s.CarrierReview.FirstOrDefault().Comment,
+				rate = s.CarrierReview.FirstOrDefault() != null ? s.CarrierReview.FirstOrDefault().Rate : 0,
+				comment = s.CarrierReview.FirstOrDefault() != null ? s.CarrierReview.FirstOrDefault().Comment : null,
 				from = s.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
 				image1 = s.Image1 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 1) : null,
 				image2 = s.Image2 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 2) : null,
@@ -855,13 +1000,15 @@ namespace Windyship.Api.Controllers
 				weight = s.Weight
 			});
 
-			var travels = _carryTravelRepository.GetQuery(t => t.UserId == request.User_id).Select(t => new
+			var travelsDb = _carryTravelRepository.GetQuery(t => t.UserId == request.User_id).ToList();
+
+			var travels = travelsDb.Select(t => new
 			{
 				TravelId = t.Id,
 				from = t.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
 				to = t.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+				isTravelActive = t.Active,
 				TravelingDate = t.TravelingDate,
-				//mobile:7678969878,
 				Image = user.Avatar != null ? string.Format("Image/Avatar?id={0}", user.Id) : null,
 				CarrierRestrictions = t.DisabledCategories.Select(c => c.Category.GetName(request.language))
 			});
@@ -877,24 +1024,149 @@ namespace Windyship.Api.Controllers
 		}
 
 		[Route("getNotifications"), HttpPost]
-		public async Task<IHttpActionResult> GetNotifications()
+		public IHttpActionResult GetNotifications(PagedRequest request)
 		{
 			var id = User.Identity.GetUserId<int>();
-			var noties = await _notificationRepository.GetAllAsync(n => n.UserId == id && !n.Sent);
+			var noties = _notificationRepository.GetQuery(n => n.UserId == id);
 
-			foreach (var notice in noties)
+			var notiesPaged = noties.OrderByDescending(n => n.Id).Skip(request.page - 1).Take(20).Select(n => new
 			{
-				notice.Sent = true;
-				_notificationRepository.Update(notice);
+				aps = n.Aps,
+				data = n.Data
+			});
+
+			return Ok(new
+			{
+				status = true,
+				pages_count = Math.Ceiling((float)noties.Count() / 20),
+				page = request.page,
+				items = notiesPaged
+			});
+		}
+
+		[Route("getShipment"), HttpPost]
+		public async Task<IHttpActionResult> GetShipment(ShipmentsRequest request)
+		{
+			var id = User.Identity.GetUserId<int>();
+			var result = await _shipmentRepository.GetFirstOrDefaultAsync(s => s.Id == request.shipment_id && (s.UserId == id || s.CarrierId == id));
+
+			if (result != null)
+			{
+				var shipment = new ShipmentViewModel
+				{
+					budget = result.Budget,
+					category_id = result.CategoryId,
+					category = result.Category.GetName(request.language),
+					currency = result.Currency,
+					delevery_date = result.DeleveryDate,
+					description = result.Description,
+					from = result.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+					image1 = result.Image1 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", result.Id, 1) : null,
+					image2 = result.Image2 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", result.Id, 2) : null,
+					image3 = result.Image3 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", result.Id, 3) : null,
+					post_date = result.PostDate,
+					recipiant_mobile = result.RecipiantMobile,
+					recipiant_name = result.RecipiantName,
+					recipiant_secoundary_mobile = result.RecipiantSecoundary_mobile,
+					recipiant_secoundary_name = result.RecipiantSecoundary_name,
+					sender = new SmallUserViewModel
+					{
+						id = result.User.Id,
+						name = result.User.FirstName,
+						image = result.User.Avatar != null ? string.Format("Image/Avatar?id={0}", result.User.Id) : null,
+					},
+					carrier = result.CarrierId == null ? null : new SmallUserViewModel
+					{
+						id = result.CarrierId.Value,
+						name = result.Carrier.FirstName,
+						image = result.Carrier.Avatar != null ? string.Format("Image/Avatar?id={0}", result.Carrier.Id) : null,
+					},
+					shipment_id = result.Id,
+					shipment_status = (int)result.ShipmentStatus,
+					size = result.Size,
+					title = result.Title,
+					to = result.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+					weight = result.Weight
+				};
+
+				return ApiResult(true, shipment);
+			}
+
+			return ApiResult(false);
+		}
+
+		[Route("notDelivered"), HttpPost]
+		public async Task<IHttpActionResult> NotDelivered(ShipmentsRequest request)
+		{
+			var id = User.Identity.GetUserId<int>();
+
+			var shipment = await _shipmentRepository.GetFirstOrDefaultAsync(s => s.Id == request.shipment_id && s.UserId == id);
+
+			if (shipment != null)
+			{
+				shipment.ShipmentStatus = ShipmentStatus.NotDelivered;
+				await _unitOfWork.SaveChangesAsync();
+
+				await _notificationService.SendNotice(id, shipment.CarrierId.Value, shipment, 10);
+				return ApiResult(true);
+			}
+
+			return ApiResult(false);
+		}
+
+		[Route("cancelShipment"), HttpPost]
+		public async Task<IHttpActionResult> CancelShipment(ShipmentsRequest request)
+		{
+			var id = User.Identity.GetUserId<int>();
+
+			var shipment = await _shipmentRepository.GetFirstOrDefaultAsync(s => s.Id == request.shipment_id && (s.UserId == id || s.CarrierId == id)
+				&& (s.ShipmentStatus == ShipmentStatus.HireCarrier || s.ShipmentStatus == ShipmentStatus.DeliveredToCarrier ||
+				s.ShipmentStatus == ShipmentStatus.AcceptShipmentRequest));
+
+			if (shipment != null)
+			{
+				if (shipment.UserId == id && shipment.CarrierId.HasValue)
+				{
+					await _notificationService.SendNotice(id, shipment.CarrierId.Value, shipment, 8);
+				}
+				else
+				{
+					await _notificationService.SendNotice(shipment.UserId, id, shipment, 8);
+				}
+
+				if (shipment.ShipmentStatus == ShipmentStatus.HireCarrier)
+				{
+					shipment.ShipmentStatus = ShipmentStatus.PostShipmentRequest;
+				}
+				else
+				{
+					shipment.ShipmentStatus = ShipmentStatus.Cancelled;
+				}
+
+				shipment.CarrierId = null;
+
+				await _unitOfWork.SaveChangesAsync();
+
+				return ApiResult(true);
+			}
+
+			return ApiResult(false);
+		}
+
+		[Route("ResetStatus"), HttpGet]
+		public async Task<IHttpActionResult> ResetStatus()
+		{
+			var all = _shipmentRepository.All();
+
+			foreach (var s in all)
+			{
+				s.ShipmentStatus = ShipmentStatus.PostShipmentRequest;
+				s.CarrierId = null;
 			}
 
 			await _unitOfWork.SaveChangesAsync();
 
-			return ApiResult(true, noties.Select(n => new
-			{
-				aps = n.Aps,
-				data = n.Data
-			}));
+			return ApiResult(true);
 		}
 	}
 }
