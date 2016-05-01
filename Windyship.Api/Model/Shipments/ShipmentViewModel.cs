@@ -25,6 +25,8 @@ namespace Windyship.Api.Model.Shipments
 
 		public int rate { get; set; }
 
+		public bool interested { get; set; }
+
 		public string comment { get; set; }
 
 		public string image1 { get; set; }
@@ -54,6 +56,8 @@ namespace Windyship.Api.Model.Shipments
 		public int shipment_status { get; set; }
 
 		public SmallUserViewModel sender { get; set; }
+
+		public SmallUserViewModel carrier { get; set; }
 
 		public string category { get; set; }
 	}

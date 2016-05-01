@@ -171,5 +171,12 @@ namespace Windyship.Dal.Core
 
 			return await GetQuery( searchCriteria ).AnyAsync();
 		}
+
+		public bool Any(Expression<Func<TEntity, bool>> searchCriteria)
+		{
+			if (searchCriteria == null) throw new ArgumentNullException("searchCriteria");
+
+			return GetQuery(searchCriteria).Any();
+		}
 	}
 }

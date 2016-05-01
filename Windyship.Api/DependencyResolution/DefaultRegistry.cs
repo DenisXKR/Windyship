@@ -23,6 +23,7 @@ namespace Windyship.Api.DependencyResolution
 	using StructureMap.Graph;
 	using System.Data.Entity;
 	using System.Web;
+	using Windyship.Api.Services;
 	using Windyship.Api.Services.IdentitySvc;
 	using Windyship.Core;
 	using Windyship.Dal;
@@ -79,6 +80,7 @@ namespace Windyship.Api.DependencyResolution
 			For<INotificationRepository>().Use<NotificationRepository>();
 			For<IDeviceTokenRepository>().Use<DeviceTokenRepository>();
 			For<IInterestedShipmentRepository>().Use<InterestedShipmentRepository>();
+			For<INotificationService>().Use<NotificationService>();
 
 			For<IShipmentRepository>().Use<ShipmentRepository>();
 			For<ICarryTravelRepository>().Use<CarryTravelRepository>();

@@ -13,6 +13,8 @@ namespace Windyship.Entities
 		AcceptShipmentRequest = 3,
 		DeliveredToCarrier = 4,
 		DeliveredToReceipt = 5,
-		Review = 6
+		Review = 6,
+		Cancelled = 7,
+		NotDelivered = 8
 	}
 }

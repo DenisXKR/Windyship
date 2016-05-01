@@ -22,7 +22,6 @@ C:\Windyship\Windyship\bin\Release\Newtonsoft.Json.dll
 C:\Windyship\Windyship\bin\Release\EntityFramework.xml
 C:\Windyship\Windyship\bin\Release\EntityFramework.SqlServer.xml
 C:\Windyship\Windyship\bin\Release\Newtonsoft.Json.xml
-C:\Windyship\Windyship\obj\Release\Windyship.Dal.csprojResolveAssemblyReference.cache
 C:\Windyship\Windyship\obj\Release\Windyship.Migrations.InitialCreate.resources
 C:\Windyship\Windyship\obj\Release\Windyship.Migrations.Content.resources
 C:\Windyship\Windyship\obj\Release\Windyship.Dal.csproj.GenerateResource.Cache
@@ -32,3 +31,4 @@ C:\Windyship\Windyship\obj\Release\Windyship.Migrations.reconfig.resources
 C:\Windyship\Windyship\obj\Release\Windyship.Migrations.CarryTravelRebild.resources
 C:\Windyship\Windyship\obj\Release\Windyship.Migrations.CarryTravelRebild1.resources
 C:\Windyship\Windyship\obj\Release\Windyship.Migrations.CarryTravelRebild2.resources
+C:\Windyship\Windyship\obj\Release\Windyship.Dal.csprojResolveAssemblyReference.cache

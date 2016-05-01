@@ -391,8 +391,7 @@ namespace Windyship.Api.Controllers
 		{
 			var id = User.Identity.GetUserId<int>();
 
-			var result = await _deviceTokenRepository.GetFirstOrDefaultAsync(t => t.UserId == id && (int)t.DeviceType == request.device_type &&
-				t.Token == request.device_token);
+			var result = await _deviceTokenRepository.GetFirstOrDefaultAsync(t => t.UserId == id && (int)t.DeviceType == request.device_type);
 
 			if (result == null)
 			{
@@ -404,12 +403,24 @@ namespace Windyship.Api.Controllers
 				};
 
 				_deviceTokenRepository.Add(dt);
-				await _unitOfWork.SaveChangesAsync();
-
-				return ApiResult(true);
+			}
+			else
+			{
+				result.Token = request.device_token;
 			}
 
-			return ApiResult(false);
+			await _unitOfWork.SaveChangesAsync();
+			return ApiResult(true);
+		}
+
+		[Route("logout"), HttpPost]
+		public async Task<IHttpActionResult> Logout(AddTokenRequest request)
+		{
+			var id = User.Identity.GetUserId<int>();
+			_deviceTokenRepository.RemoveRange(d => d.UserId == id && d.Token == request.device_token);
+			await _unitOfWork.SaveChangesAsync();
+
+			return ApiResult(true);
 		}
 
 		#region System

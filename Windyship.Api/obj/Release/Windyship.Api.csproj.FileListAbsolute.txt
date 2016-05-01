@@ -148,3 +148,8 @@ C:\Windyship\Windyship.Api\bin\System.Web.WebPages.Razor.xml
 C:\Windyship\Windyship.Api\obj\Release\Windyship.Api.csprojResolveAssemblyReference.cache
 C:\Windyship\Windyship.Api\obj\Release\Windyship.Api.dll
 C:\Windyship\Windyship.Api\obj\Release\Windyship.Api.pdb
+C:\Windyship\Windyship.Api\bin\NLog.config
+C:\Windyship\Windyship.Api\bin\MoonAPNS.dll
+C:\Windyship\Windyship.Api\bin\NLog.dll
+C:\Windyship\Windyship.Api\bin\MoonAPNS.pdb
+C:\Windyship\Windyship.Api\bin\NLog.xml

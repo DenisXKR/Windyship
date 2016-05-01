@@ -35,6 +35,8 @@ namespace Windyship.Core
 		/// </summary>
 		Task<bool> AnyAsync(Expression<Func<TEntity, bool>> searchCriteria);
 
+		bool Any(Expression<Func<TEntity, bool>> searchCriteria);
+
 		Task<TEntity> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> searchCriteria);
 		Task<TResult> GetFirstOrDefaultAsync<TResult>(Expression<Func<TEntity, bool>> searchCriteria, Expression<Func<TEntity, TResult>> selector);
 		Task<TResult> GetFirstOrDefaultAsync<TResult, TProperty>(Expression<Func<TEntity, bool>> searchCriteria, Expression<Func<TEntity, TResult>> selector, Expression<Func<TResult, TProperty>> path);

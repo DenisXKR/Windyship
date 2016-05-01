@@ -10,6 +10,9 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <_PublishTargetUrl>ftp://108.179.198.227/httpdocs</_PublishTargetUrl>
   </PropertyGroup>
   <ItemGroup>
+    <File Include="App_Data/aps_development.cer">
+      <publishTime>04/24/2016 19:37:17</publishTime>
+    </File>
     <File Include="App_Readme/Elmah.txt">
       <publishTime>04/05/2016 12:26:04</publishTime>
     </File>
@@ -67,8 +70,17 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <File Include="bin/Microsoft.Web.Infrastructure.dll">
       <publishTime>04/02/2016 11:40:49</publishTime>
     </File>
+    <File Include="bin/MoonAPNS.dll">
+      <publishTime>04/22/2016 17:02:01</publishTime>
+    </File>
     <File Include="bin/Newtonsoft.Json.dll">
       <publishTime>04/07/2016 08:52:33</publishTime>
+    </File>
+    <File Include="bin/NLog.config">
+      <publishTime>10/12/2011 12:01:44</publishTime>
+    </File>
+    <File Include="bin/NLog.dll">
+      <publishTime>10/12/2011 12:01:44</publishTime>
     </File>
     <File Include="bin/Owin.dll">
       <publishTime>04/02/2016 11:35:10</publishTime>
@@ -134,13 +146,13 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>04/02/2016 11:40:49</publishTime>
     </File>
     <File Include="bin/Windyship.Api.dll">
-      <publishTime>04/22/2016 16:10:23</publishTime>
+      <publishTime>05/01/2016 16:22:04</publishTime>
     </File>
     <File Include="bin/Windyship.Api.pdb">
       <publishTime>04/10/2016 23:08:38</publishTime>
     </File>
     <File Include="bin/Windyship.dll">
-      <publishTime>04/22/2016 16:10:22</publishTime>
+      <publishTime>04/28/2016 12:06:47</publishTime>
     </File>
     <File Include="bin/Windyship.pdb">
       <publishTime>04/10/2016 23:08:38</publishTime>
@@ -158,7 +170,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>04/13/2016 09:16:56</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>04/13/2016 12:25:52</publishTime>
+      <publishTime>04/22/2016 17:02:53</publishTime>
     </File>
   </ItemGroup>
 </Project>
