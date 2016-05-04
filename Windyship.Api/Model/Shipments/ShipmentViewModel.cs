@@ -23,7 +23,7 @@ namespace Windyship.Api.Model.Shipments
 
 		public bool isInterestActive { get; set; }
 
-		public int category_id { get; set; }
+		public int? category_id { get; set; }
 
 		public int rate { get; set; }
 

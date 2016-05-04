@@ -29,7 +29,7 @@ namespace Windyship.Entities
 
 		public byte[] Image3 { get; set; }
 
-		public int CategoryId { get; set; }
+		public int? CategoryId { get; set; }
 
 		public string Description { get; set; }
 

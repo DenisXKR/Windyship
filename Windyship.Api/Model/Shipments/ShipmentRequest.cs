@@ -48,8 +48,7 @@ namespace Windyship.Api.Model.Shipments
 
 		public IEnumerable<LocationViewModel> To { get; set; }
 
-		[Required]
-		public int Category_id { get; set; }
+		public int? Category_id { get; set; }
 
 		public string Description { get; set; }
 
