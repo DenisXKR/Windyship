@@ -15,7 +15,6 @@ namespace Windyship.Entities
 		DeliveredToReceipt = 5,
 		Review = 6,
 		Cancelled = 7,
-		NotDelivered = 8,
-		Arhived = 9
+		NotDelivered = 8
 	}
 }

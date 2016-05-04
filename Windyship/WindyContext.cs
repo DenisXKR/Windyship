@@ -28,6 +28,7 @@ namespace Windyship.Dal
 		public DbSet<Notification> Notification { get; set; }
 		public DbSet<DeviceToken> DeviceToken { get; set; }
 		public DbSet<InterestedShipment> InterestedShipment { get; set; }
+		public DbSet<ArhivedShipment> ArhivedShipment { get; set; }
 
 		protected override void OnModelCreating(DbModelBuilder modelBuilder)
 		{

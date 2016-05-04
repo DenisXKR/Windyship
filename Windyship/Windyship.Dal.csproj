@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\ArhivedShipment.cs" />
     <Compile Include="Entities\CarrierReview.cs" />
     <Compile Include="Entities\CarryTravel.cs" />
     <Compile Include="Entities\Category.cs" />
@@ -95,6 +96,8 @@
       <DependentUpon>201604150905321_CarryTravelRebild2.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Repositories\ArhivedShipmentRepository.cs" />
+    <Compile Include="Repositories\IArhivedShipmentRepository.cs" />
     <Compile Include="Repositories\InterestedShipmentRepository.cs" />
     <Compile Include="Repositories\DeviceTokenRepository.cs" />
     <Compile Include="Repositories\IInterestedShipmentRepository.cs" />
