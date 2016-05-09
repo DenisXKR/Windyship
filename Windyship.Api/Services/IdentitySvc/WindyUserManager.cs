@@ -96,9 +96,7 @@ namespace Windyship.Api.Services.IdentitySvc
 			var user = await Store.FindByNameAsync(phone);
 			if (user == null) return;
 
-#warning Test
-			var smsCode = "1234";
-			//var smsCode = TokenGenerator.GetUniqueDigits(6);
+			var smsCode = TokenGenerator.GetUniqueDigits(6);
 
 			var isPhoneChecked = user.PhoneChecked;
 
@@ -109,12 +107,8 @@ namespace Windyship.Api.Services.IdentitySvc
 
 			await Store.UpdateAsync(user);
 
-#warning SendSMS
-
-			/*
-				var smsText = string.Format("Code: {0}", smsCode);
-				var sended = await Sms24x7.Send(phone, smsText);
-			*/
+			var smsText = string.Format("Code: {0}", smsCode);
+			WindySmsService.SendMessage(smsText, phone);
 		}
 
 		public async Task<bool> IsAccountConfirmedAsync(string phone)

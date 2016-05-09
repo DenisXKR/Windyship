@@ -270,6 +270,7 @@
     <Compile Include="Services\IdentitySvc\TokenGenerator.cs" />
     <Compile Include="Services\INotificationService.cs" />
     <Compile Include="Services\NotificationService.cs" />
+    <Compile Include="Services\SmsService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
