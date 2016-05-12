@@ -21,8 +21,8 @@ namespace Windyship.Api.Model.Shipments
 			this.UserId = entity.UserId;
 			this.Title = entity.Title;
 			this.Delevery_date = entity.DeleveryDate;
-			this.From = entity.From.Select(l => new LocationViewModel { Long = l.Long, Lat = l.Lat, Country = l.Country, Address = l.Address });
-			this.To = entity.To.Select(l => new LocationViewModel { Long = l.Long, Lat = l.Lat, Country = l.Country, Address = l.Address });
+			this.From = entity.From.Select(l => new LocationViewModel { Long = l.Long, Lat = l.Lat, Country = l.Country, City = l.City, Address = l.Address });
+			this.To = entity.To.Select(l => new LocationViewModel { Long = l.Long, Lat = l.Lat, Country = l.Country, City = l.City, Address = l.Address });
 			this.Category_id = entity.CategoryId;
 			this.Description = entity.Description;
 			this.Budget = entity.Budget;

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNet.Identity;
-using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Data.Entity.Spatial;
 using System.Device.Location;
 using System.Globalization;
@@ -35,6 +35,7 @@ namespace Windyship.Api.Controllers
 		private readonly IDisabledCategoriesRepository _disabledCategoriesRepository;
 		private readonly ICarrierReviewRepository _carrierReviewRepository;
 		private readonly INotificationRepository _notificationRepository;
+		private readonly IArhivedShipmentRepository _arhivedShipmentRepository;
 
 		private readonly INotificationService _notificationService;
 
@@ -44,7 +45,7 @@ namespace Windyship.Api.Controllers
 			ILocationFromRepository locationFromRepository, ILocationToRepository locationToRepository, ITravelFromRepository travelFromRepository,
 			ITravelToRepository travelToRepository, IDisabledCategoriesRepository disabledCategoriesRepository, ICarrierReviewRepository carrierReviewRepository,
 			ICarryTravelRepository carryTravelRepository, INotificationRepository notificationRepository, IInterestedShipmentRepository interestedShipmentRepository,
-			INotificationService notificationService, IUnitOfWork unitOfWork)
+			INotificationService notificationService, IArhivedShipmentRepository arhivedShipmentRepository, IUnitOfWork unitOfWork)
 		{
 			_userRepository = userRepository;
 			_categoryRepository = categoryRepository;
@@ -59,6 +60,7 @@ namespace Windyship.Api.Controllers
 			_notificationRepository = notificationRepository;
 			_interestedShipmentRepository = interestedShipmentRepository;
 			_notificationService = notificationService;
+			_arhivedShipmentRepository = arhivedShipmentRepository;
 
 			_unitOfWork = unitOfWork;
 		}
@@ -104,7 +106,7 @@ namespace Windyship.Api.Controllers
 				{
 					foreach (var loc in request.To)
 					{
-						var locationTo = new LocationTo { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, Address = loc.Address, ShipmentId = shipment.Id };
+						var locationTo = new LocationTo { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, City = loc.City, Address = loc.Address, ShipmentId = shipment.Id };
 						_locationToRepository.Add(locationTo);
 					}
 				}
@@ -113,7 +115,7 @@ namespace Windyship.Api.Controllers
 				{
 					foreach (var loc in request.From)
 					{
-						var locationFrom = new LocationFrom { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, Address = loc.Address, ShipmentId = shipment.Id };
+						var locationFrom = new LocationFrom { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, City = loc.City, Address = loc.Address, ShipmentId = shipment.Id };
 						_locationFromRepository.Add(locationFrom);
 					}
 				}
@@ -160,7 +162,7 @@ namespace Windyship.Api.Controllers
 					{
 						foreach (var loc in request.To)
 						{
-							var locationTo = new LocationTo { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, Address = loc.Address, ShipmentId = shipment.Id };
+							var locationTo = new LocationTo { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, City = loc.City, Address = loc.Address, ShipmentId = shipment.Id };
 							_locationToRepository.Add(locationTo);
 						}
 					}
@@ -171,7 +173,7 @@ namespace Windyship.Api.Controllers
 					{
 						foreach (var loc in request.From)
 						{
-							var locationFrom = new LocationFrom { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, Address = loc.Address, ShipmentId = shipment.Id };
+							var locationFrom = new LocationFrom { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, City = loc.City, Address = loc.Address, ShipmentId = shipment.Id };
 							_locationFromRepository.Add(locationFrom);
 						}
 					}
@@ -301,7 +303,7 @@ namespace Windyship.Api.Controllers
 				{
 					foreach (var loc in request.To)
 					{
-						var locationTo = new TravelTo { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, Address = loc.Address, CarryTraveId = carryTravel.Id };
+						var locationTo = new TravelTo { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, City = loc.City, Address = loc.Address, CarryTraveId = carryTravel.Id };
 						_travelToRepository.Add(locationTo);
 					}
 				}
@@ -310,7 +312,7 @@ namespace Windyship.Api.Controllers
 				{
 					foreach (var loc in request.From)
 					{
-						var locationFrom = new TravelFrom { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, Address = loc.Address, CarryTraveId = carryTravel.Id };
+						var locationFrom = new TravelFrom { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, City = loc.City, Address = loc.Address, CarryTraveId = carryTravel.Id };
 						_travelFromRepository.Add(locationFrom);
 					}
 				}
@@ -356,7 +358,7 @@ namespace Windyship.Api.Controllers
 				{
 					foreach (var loc in request.To)
 					{
-						var locationTo = new TravelTo { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, Address = loc.Address, CarryTraveId = carryTravel.Id };
+						var locationTo = new TravelTo { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, City = loc.City, Address = loc.Address, CarryTraveId = carryTravel.Id };
 						_travelToRepository.Add(locationTo);
 					}
 				}
@@ -367,7 +369,7 @@ namespace Windyship.Api.Controllers
 				{
 					foreach (var loc in request.From)
 					{
-						var locationFrom = new TravelFrom { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, Address = loc.Address, CarryTraveId = carryTravel.Id };
+						var locationFrom = new TravelFrom { Lat = loc.Lat, Long = loc.Long, Country = loc.Country, City = loc.City, Address = loc.Address, CarryTraveId = carryTravel.Id };
 						_travelFromRepository.Add(locationFrom);
 					}
 				}
@@ -441,12 +443,12 @@ namespace Windyship.Api.Controllers
 				};
 
 				_carrierReviewRepository.Add(review);
-				await _unitOfWork.SaveChangesAsync();
+				_unitOfWork.SaveChanges();
 
 				await _notificationService.SendNotice(id, shipment.CarrierId.Value, shipment, 6);
 
 				var rate = _carrierReviewRepository.GetQuery(u => u.Shipment.CarrierId == shipment.CarrierId).Average(r => (decimal?)r.Rate);
-				user.CarrierRating = rate ?? 0;
+				shipment.Carrier.CarrierRating = rate ?? 0;
 				await _unitOfWork.SaveChangesAsync();
 
 				return ApiResult(true);
@@ -466,14 +468,16 @@ namespace Windyship.Api.Controllers
 				var fromShipment = shipment.From.FirstOrDefault();
 				var toShipment = shipment.To.FirstOrDefault();
 
-				var @from = DbGeography.FromText( String.Format( CultureInfo.InvariantCulture.NumberFormat, "POINT({0} {1})", fromShipment.Long, fromShipment.Lat ), 4326 );
-				var @to = DbGeography.FromText( String.Format( CultureInfo.InvariantCulture.NumberFormat, "POINT({0} {1})", toShipment.Long, toShipment.Lat ), 4326 );
+				if (fromShipment == null || toShipment == null) return ApiResult(false, "Empty shipment location");
+
+				var @from = DbGeography.FromText(String.Format(CultureInfo.InvariantCulture.NumberFormat, "POINT({0} {1})", fromShipment.Long, fromShipment.Lat), 4326);
+				var @to = DbGeography.FromText(String.Format(CultureInfo.InvariantCulture.NumberFormat, "POINT({0} {1})", toShipment.Long, toShipment.Lat), 4326);
 
 				var fromPoints = _travelFromRepository.GetQuery(t => t.CarryTravel.UserId != id && t.CarryTravel.Active &&
-					t.CarryTravel.TravelingDate >= DateTime.Now && t.Country == fromShipment.Country);
+					t.CarryTravel.TravelingDate >= DateTime.Now && t.Country == fromShipment.Country && t.City == fromShipment.City);
 
 				var toPoints = _travelToRepository.GetQuery(t => t.CarryTravel.UserId != id && t.CarryTravel.Active &&
-					t.CarryTravel.TravelingDate >= DateTime.Now && t.Country == toShipment.Country);
+					t.CarryTravel.TravelingDate >= DateTime.Now && t.Country == toShipment.Country && t.City == toShipment.City);
 
 				var distance = from f in fromPoints
 							   join t in toPoints on f.CarryTraveId equals t.CarryTraveId
@@ -500,6 +504,7 @@ namespace Windyship.Api.Controllers
 							Lat = c.FromPoint.Lat,
 							Long = c.FromPoint.Long,
 							Country = c.FromPoint.Country,
+							City = c.FromPoint.City ,
 							Address = c.FromPoint.Address
 						} : null,
 					To = c.ToPoin != null ?
@@ -508,6 +513,7 @@ namespace Windyship.Api.Controllers
 							Lat = c.ToPoin.Lat,
 							Long = c.ToPoin.Long,
 							Country = c.ToPoin.Country,
+							City = c.FromPoint.City,
 							Address = c.ToPoin.Address
 						} : null,
 					Image = string.Format("image/avatar?id={0}", c.TravelFrom.UserId),
@@ -516,9 +522,18 @@ namespace Windyship.Api.Controllers
 					Rating = c.TravelFrom.User.CarrierRating,
 					CarrierRestrictions = c.TravelFrom.DisabledCategories.Select(g => g.Category.GetName(request.Language)),
 					Distance = c.Distanse.Value
-				}).OrderBy(c => c.Distance);
+				});
+				
+				IEnumerable<CarrierViewModel> sortedCarriers = null;
 
-				return ApiResult(true, carriers);
+				switch (request.Sort)
+				{
+					case "soonest": sortedCarriers = carriers.OrderBy(s => s.Delivery_date); break;
+					case "rate": sortedCarriers = carriers.OrderBy(s => s.Rating); break;
+					default: sortedCarriers = carriers.OrderBy(s => s.Distance); break;
+				}
+
+				return ApiResult(true, sortedCarriers);
 			}
 			else return ApiResult(false);
 		}
@@ -530,7 +545,7 @@ namespace Windyship.Api.Controllers
 			var now = DateTime.Now.Date;
 
 			var travels = await _carryTravelRepository.GetAllAsync(t => t.UserId == id);
-			var pagedTrevels = travels.OrderBy(t => t.TravelingDate).Skip((request.Page - 1) * 20).Take(20).ToList();
+			var pagedTrevels = travels.OrderByDescending(t => t.TravelingDate).Skip((request.Page - 1) * 20).Take(20).ToList();
 
 			var result = pagedTrevels.Select(t => new CarryTravelViewModel
 			{
@@ -670,7 +685,7 @@ namespace Windyship.Api.Controllers
 			{
 				shipment.PinCode = TokenGenerator.GetUniqueDigits(6);
 
-#warning Send shipment pin code by sms
+				WindySmsService.SendMessage(String.Format("Shipment pincode : {0}", shipment.PinCode), shipment.RecipiantMobile);
 
 				shipment.ShipmentStatus = ShipmentStatus.AcceptShipmentRequest;
 
@@ -729,7 +744,7 @@ namespace Windyship.Api.Controllers
 			{
 				shipment.ShipmentStatus = ShipmentStatus.DeliveredToReceipt;
 				shipment.DeleveryDate = DateTime.Now;
-				await _notificationService.SendNotice(shipment.UserId, id, shipment, 5);
+				await _notificationService.SendNotice(id, shipment.CarrierId.Value, shipment, 5);
 				await _unitOfWork.SaveChangesAsync();
 
 				return ApiResult(true);
@@ -742,8 +757,7 @@ namespace Windyship.Api.Controllers
 		public IHttpActionResult GetMyShipments(GetMyShipmentsRequest request)
 		{
 			var id = User.Identity.GetUserId<int>();
-
-			IQueryable<Shipment> shipments = null;
+			IEnumerable<Shipment> shipments = null;
 
 			if (request.View_as == "carrier")
 			{
@@ -761,8 +775,10 @@ namespace Windyship.Api.Controllers
 						break;
 
 					case "history":
-						shipments = _shipmentRepository.GetQuery(s => s.CarrierId == id && (s.ShipmentStatus == ShipmentStatus.Review ||
-							s.ShipmentStatus == ShipmentStatus.NotDelivered));
+						shipments = from s in _shipmentRepository.All()
+									where s.CarrierId == id && !_arhivedShipmentRepository.Any(a => a.UserId == id && s.Id == a.ShipmentId) &&
+									(s.ShipmentStatus == ShipmentStatus.Review || s.ShipmentStatus == ShipmentStatus.NotDelivered)
+									select s;
 						break;
 				}
 			}
@@ -782,8 +798,10 @@ namespace Windyship.Api.Controllers
 						break;
 
 					case "history":
-						shipments = _shipmentRepository.GetQuery(s => s.UserId == id && (s.ShipmentStatus == ShipmentStatus.Review ||
-							s.ShipmentStatus == ShipmentStatus.Cancelled || s.ShipmentStatus == ShipmentStatus.NotDelivered));
+						shipments = from s in _shipmentRepository.All()
+									where s.UserId == id && !_arhivedShipmentRepository.Any(a => a.UserId == id && s.Id == a.ShipmentId) &&
+									(s.ShipmentStatus == ShipmentStatus.Review || s.ShipmentStatus == ShipmentStatus.Cancelled || s.ShipmentStatus == ShipmentStatus.NotDelivered)
+									select s;
 						break;
 				}
 			}
@@ -792,11 +810,11 @@ namespace Windyship.Api.Controllers
 			{
 				budget = s.Budget,
 				category_id = s.CategoryId,
-				category = s.Category.GetName(request.language),
+				category = s.Category != null ? s.Category.GetName(request.language) : null,
 				currency = s.Currency,
 				delevery_date = s.DeleveryDate,
 				description = s.Description,
-				from = s.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+				from = s.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, City = l.City, Address = l.Address }),
 				image1 = s.Image1 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 1) : null,
 				image2 = s.Image2 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 2) : null,
 				image3 = s.Image3 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 3) : null,
@@ -822,7 +840,7 @@ namespace Windyship.Api.Controllers
 				shipment_status = (int)s.ShipmentStatus,
 				size = s.Size,
 				title = s.Title,
-				to = s.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+				to = s.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, City = l.City, Address = l.Address }),
 				weight = s.Weight
 			});
 
@@ -858,16 +876,17 @@ namespace Windyship.Api.Controllers
 			var id = User.Identity.GetUserId<int>();
 			var shipments = _shipmentRepository.GetQuery(s => s.ShipmentStatus == ShipmentStatus.PostShipmentRequest && s.UserId != id);
 
-			var pagedShipment = shipments.OrderByDescending(s => s.PostDate).Skip((request.Page - 1) * 20).Take(20).ToList().Select(s => new ShipmentViewModel
+			var pagedShipment = shipments.OrderByDescending(s => s.PostDate).Skip((request.Page - 1) * 20).Take(20).ToList();
+
+			var result = pagedShipment.Select(s => new ShipmentViewModel
 			{
 				budget = s.Budget,
 				category_id = s.CategoryId,
-				category = s.Category.GetName(request.language),
+				category = s.Category != null ? s.Category.GetName(request.language) : null,
 				currency = s.Currency,
 				delevery_date = s.DeleveryDate,
 				description = s.Description,
-				interested = _interestedShipmentRepository.GetQuery(i => i.ShipmentId == s.Id && i.UserId == id).FirstOrDefault() != null,
-				from = s.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+				from = s.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, City = l.City, Address = l.Address }),
 				image1 = s.Image1 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 1) : null,
 				image2 = s.Image2 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 2) : null,
 				image3 = s.Image3 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 3) : null,
@@ -888,17 +907,24 @@ namespace Windyship.Api.Controllers
 				shipment_status = (int)s.ShipmentStatus,
 				size = s.Size,
 				title = s.Title,
-				to = s.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+				to = s.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, City = l.City, Address = l.Address }),
 				weight = s.Weight
 			}).ToList();
 
-			foreach (var shipment in pagedShipment)
+			foreach (var shipment in result)
 			{
-				var fromCountry = shipment.from.FirstOrDefault().Country;
-				var toCountry = shipment.to.FirstOrDefault().Country;
+				var fromCountry = shipment.from.FirstOrDefault();
+				var toCountry = shipment.to.FirstOrDefault();
 
-				shipment.isInterestActive = _carryTravelRepository.Any(t => t.TravelingDate >= DateTime.Now && t.Active && t.UserId == id &&
-					t.From.Any(f => f.Country == fromCountry) && t.To.Any(p => p.Country == toCountry));
+				if (fromCountry != null && toCountry != null)
+				{
+					shipment.isInterestActive = _carryTravelRepository.Any(t => t.TravelingDate >= DateTime.Now && t.Active && t.UserId == id &&
+						t.From.Any(f => f.Country == fromCountry.Country) && t.To.Any(p => p.Country == toCountry.Country));
+				}
+				else
+				{
+					shipment.isInterestActive = false;
+				}
 			}
 
 			return Ok(new
@@ -906,7 +932,7 @@ namespace Windyship.Api.Controllers
 				status = true,
 				pages_count = Math.Ceiling((float)shipments.Count() / 20),
 				page = request.Page,
-				items = pagedShipment
+				items = result
 			});
 		}
 
@@ -923,13 +949,13 @@ namespace Windyship.Api.Controllers
 			{
 				budget = s.Budget,
 				category_id = s.CategoryId,
-				category = s.Category.GetName(request == null ? "en" : request.language),
+				category = s.Category != null ? s.Category.GetName(request == null ? "en" : request.language) : null,
 				currency = s.Currency,
 				delevery_date = s.DeleveryDate,
 				description = s.Description,
 				rate = s.CarrierReview.FirstOrDefault() != null ? s.CarrierReview.FirstOrDefault().Rate : 0,
 				comment = s.CarrierReview.FirstOrDefault() != null ? s.CarrierReview.FirstOrDefault().Comment : null,
-				from = s.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+				from = s.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, City = l.City, Address = l.Address }),
 				image1 = s.Image1 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 1) : null,
 				image2 = s.Image2 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 2) : null,
 				image3 = s.Image3 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 3) : null,
@@ -944,7 +970,7 @@ namespace Windyship.Api.Controllers
 				shipment_status = (int)s.ShipmentStatus,
 				size = s.Size,
 				title = s.Title,
-				to = s.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+				to = s.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, City = l.City, Address = l.Address }),
 				weight = s.Weight
 			});
 
@@ -975,13 +1001,13 @@ namespace Windyship.Api.Controllers
 			{
 				budget = s.Budget,
 				category_id = s.CategoryId,
-				category = s.Category.GetName(request.language),
+				category = s.Category != null ? s.Category.GetName(request.language) : null,
 				currency = s.Currency,
 				delevery_date = s.DeleveryDate,
 				description = s.Description,
 				rate = s.CarrierReview.FirstOrDefault() != null ? s.CarrierReview.FirstOrDefault().Rate : 0,
 				comment = s.CarrierReview.FirstOrDefault() != null ? s.CarrierReview.FirstOrDefault().Comment : null,
-				from = s.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+				from = s.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, City = l.City, Address = l.Address }),
 				image1 = s.Image1 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 1) : null,
 				image2 = s.Image2 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 2) : null,
 				image3 = s.Image3 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", s.Id, 3) : null,
@@ -996,7 +1022,7 @@ namespace Windyship.Api.Controllers
 				shipment_status = (int)s.ShipmentStatus,
 				size = s.Size,
 				title = s.Title,
-				to = s.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+				to = s.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, City = l.City, Address = l.Address }),
 				weight = s.Weight
 			});
 
@@ -1005,8 +1031,8 @@ namespace Windyship.Api.Controllers
 			var travels = travelsDb.Select(t => new
 			{
 				TravelId = t.Id,
-				from = t.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
-				to = t.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+				from = t.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, City = l.City, Address = l.Address }),
+				to = t.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, City = l.City, Address = l.Address }),
 				isTravelActive = t.Active,
 				TravelingDate = t.TravelingDate,
 				Image = user.Avatar != null ? string.Format("Image/Avatar?id={0}", user.Id) : null,
@@ -1017,6 +1043,7 @@ namespace Windyship.Api.Controllers
 			{
 				name = user.FirstName,
 				rating = user.CarrierRating,
+				mobile = user.Phone,
 				image = user.Avatar != null ? string.Format("Image/Avatar?id={0}", user.Id) : null,
 				history = history,
 				travels = travels
@@ -1029,7 +1056,7 @@ namespace Windyship.Api.Controllers
 			var id = User.Identity.GetUserId<int>();
 			var noties = _notificationRepository.GetQuery(n => n.UserId == id);
 
-			var notiesPaged = noties.OrderByDescending(n => n.Id).Skip(request.page - 1).Take(20).Select(n => new
+			var notiesPaged = noties.OrderByDescending(n => n.Id).Skip((request.page - 1) * 20).Take(20).Select(n => new
 			{
 				aps = n.Aps,
 				data = n.Data
@@ -1056,15 +1083,16 @@ namespace Windyship.Api.Controllers
 				{
 					budget = result.Budget,
 					category_id = result.CategoryId,
-					category = result.Category.GetName(request.language),
+					category = result.Category != null ? result.Category.GetName(request.language) : null,
 					currency = result.Currency,
 					delevery_date = result.DeleveryDate,
 					description = result.Description,
-					from = result.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+					from = result.From.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, City = l.City, Address = l.Address }),
 					image1 = result.Image1 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", result.Id, 1) : null,
 					image2 = result.Image2 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", result.Id, 2) : null,
 					image3 = result.Image3 != null ? string.Format("Image/ShipmentImage?shipmentId={0}&imageId={1}", result.Id, 3) : null,
 					post_date = result.PostDate,
+
 					recipiant_mobile = result.RecipiantMobile,
 					recipiant_name = result.RecipiantName,
 					recipiant_secoundary_mobile = result.RecipiantSecoundary_mobile,
@@ -1080,12 +1108,13 @@ namespace Windyship.Api.Controllers
 						id = result.CarrierId.Value,
 						name = result.Carrier.FirstName,
 						image = result.Carrier.Avatar != null ? string.Format("Image/Avatar?id={0}", result.Carrier.Id) : null,
+						mobile = result.Carrier.Phone
 					},
 					shipment_id = result.Id,
 					shipment_status = (int)result.ShipmentStatus,
 					size = result.Size,
 					title = result.Title,
-					to = result.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, Address = l.Address }),
+					to = result.To.Select(l => new LocationViewModel { Lat = l.Lat, Long = l.Long, Country = l.Country, City = l.City, Address = l.Address }),
 					weight = result.Weight
 				};
 
@@ -1153,7 +1182,7 @@ namespace Windyship.Api.Controllers
 			return ApiResult(false);
 		}
 
-		[Route("ResetStatus"), HttpGet]
+		[Route("resetStatus"), HttpGet]
 		public async Task<IHttpActionResult> ResetStatus()
 		{
 			var all = _shipmentRepository.All();
@@ -1167,6 +1196,29 @@ namespace Windyship.Api.Controllers
 			await _unitOfWork.SaveChangesAsync();
 
 			return ApiResult(true);
+		}
+
+		[Route("hideHistoryShipment"), HttpPost]
+		public async Task<IHttpActionResult> HideHistoryShipment(ShipmentsRequest request)
+		{
+			var id = User.Identity.GetUserId<int>();
+			var shipment = await _shipmentRepository.GetFirstOrDefaultAsync(s => s.Id == request.shipment_id);
+
+			if (shipment != null)
+			{
+				var arhivedShipment = new ArhivedShipment
+				{
+					UserId = id,
+					ShipmentId = shipment.Id
+				};
+
+				_arhivedShipmentRepository.Add(arhivedShipment);
+				await _unitOfWork.SaveChangesAsync();
+
+				return ApiResult(true);
+			}
+
+			return ApiResult(false);
 		}
 	}
 }
